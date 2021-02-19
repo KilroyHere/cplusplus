@@ -11,8 +11,8 @@
 .vlcell { vertical-align: top; text-align: left; }
 .vrcell { vertical-align: top; text-align: right; }
 
-html{
-        font-family: 'Roboto Slab', serif;
+*{
+     font-family: 'Roboto Slab', serif;
 }
 
 body 
