@@ -13,10 +13,6 @@
 
 <h2>Table of contents:</h2>
 
-<form>
-    <input type=button value="Hide Show" onclick="top.toggleContents();">
-</form>
-
 <h2>Contents</h2>
 
     <blockquote>
@@ -57,10 +53,6 @@
     </blockquote>
 
 <h2>Index:</h2>
-
-<form>
-    <input type=button value="Hide Show" onclick="top.toggleIndex();">
-</form>
 
 <!--#include file="sigfrank.shtml" -->
 
