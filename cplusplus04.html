@@ -1,0 +1,2470 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<title> C++ Annotations Version 11.5.0 </title>
+<link rel="stylesheet" type="text/css" href="cplusplus.css"><style type="text/css">
+    figure {text-align: center;}
+    img {vertical-align: center;}
+    .XXfc {margin-left:auto;margin-right:auto;}
+    .XXtc {text-align: center;}
+    .XXtl {text-align: left;}
+    .XXtr {text-align: right;}
+    .XXvt {vertical-align: top;}
+    .XXvb {vertical-align: bottom;}
+</style>
+<link rel="stylesheet" type="text/css" href="cplusplus.css"></head>
+<body >
+<hr>
+<ul>
+    <li> <a href="cplusplus.html">Table of Contents</a>
+    <li> <a href="cplusplus03.html">Previous Chapter</a>
+    <li> <a href="cplusplus05.html">Next Chapter</a>
+</ul>
+<hr>
+<a name="NAMESPACE"></a><a name="l68"></a>
+<h1 >Chapter 4: Namespaces</h1>
+<a name="Namespaces"></a><a name="l69"></a>
+<h2 >4.1: Namespaces</h2>
+Imagine a math teacher who wants to develop an interactive math program. For
+this program functions like <code >cos, sin, tan</code> etc. are to be used
+accepting arguments in degrees rather than arguments in
+radians. Unfortunately, the function name <code >cos</code> is already in use, and that
+function accepts radians as its arguments, rather than degrees.
+<p>
+Problems like these are usually solved by defining another name, e.g., the
+function name <code >cosDegrees</code> is defined. <strong >C++</strong> offers an alternative
+solution through <a name="an270"></a><em >namespaces</em>. Namespaces can be considered as
+areas or regions in the code in which identifiers may be defined. Identifiers
+defined in a namespace normally won't conflict with names already defined
+elsewhere (i.e., outside of their namespaces). So, a function <code >cos</code>
+(expecting angles in degrees) could be defined in a namespace
+<code >Degrees</code>. When calling <code >cos</code> from within <code >Degrees</code> you would call the
+<code >cos</code> function expecting degrees, rather than the standard <code >cos</code> function
+expecting radians.
+<p>
+<a name="l70"></a>
+<h3 >4.1.1: Defining namespaces</h3>
+    Namespaces are defined according to the following syntax:
+        <pre>
+    namespace identifier
+    {
+        // declared or defined entities
+        // (declarative region)
+    }
+</pre>
+<p>
+The identifier used when defining a namespace is a standard <strong >C++</strong>
+identifier.
+<p>
+Within the <a name="an271"></a><em >declarative region</em>, introduced in the above code example,
+functions, variables, structs, classes and even (nested) namespaces can be
+defined or declared. Namespaces cannot be defined within a function
+body. However, it is possible to define a namespace using multiple
+<em >namespace</em> declarations. Namespaces are `<em >open</em>' meaning that
+a namespace <code >CppAnnotations</code> could be defined in a file <code >file1.cc</code> and
+also in a file <code >file2.cc</code>. Entities defined in the <code >CppAnnotations</code>
+namespace of files <code >file1.cc</code> and <code >file2.cc</code> are then united in one
+<code >CppAnnotations</code> namespace region. For example:
+        <pre>
+    // in file1.cc
+    namespace CppAnnotations
+    {
+        double cos(double argInDegrees)
+        {
+            ...
+        }
+    }
+
+    // in file2.cc
+    namespace CppAnnotations
+    {
+        double sin(double argInDegrees)
+        {
+            ...
+        }
+    }
+</pre>
+<p>
+Both <code >sin</code> and <code >cos</code> are now defined in the same
+<code >CppAnnotations</code> namespace.
+<p>
+Namespace entities can be defined outside of their namespaces. This
+topic is discussed in section <a href="cplusplus04.html#OUTSIDE">4.1.4.1</a>.
+<p>
+<a name="l71"></a>
+<h4>4.1.1.1: Declaring entities in namespaces</h4>
+            Instead of <em >defining</em> entities in a namespace, entities may also be
+<em >declared</em> in a namespace. This allows us to put all the
+    <a name="an272"></a> declarations in a header file that can
+thereupon be included in sources using the entities defined in the
+namespace. Such a header file could contain, e.g.,
+        <pre>
+    namespace CppAnnotations
+    {
+        double cos(double degrees);
+        double sin(double degrees);
+    }
+</pre>
+<p>
+<a name="l72"></a>
+<h4>4.1.1.2: A closed namespace</h4>
+        Namespaces can be defined without a name. Such an <a name="an273"></a>
+anonymous namespace restricts the visibility of the defined entities to the
+source file defining the anonymous namespace.
+<p>
+Entities defined in the anonymous namespace are comparable to <strong >C</strong>'s
+<a name="an274"></a><code >static</code> functions and variables. In <strong >C++</strong> the <code >static</code> keyword can
+still be used, but its preferred use is in <code >class</code> definitions (see
+chapter <a href="cplusplus07.html#Classes">7</a>). In situations where in <strong >C</strong> static variables or
+functions would have been used the  anonymous namespace should be used in
+<strong >C++</strong>.
+<p>
+The anonymous namespace is a <a name="an275"></a> closed namespace: it is not
+possible to add entities to the same anonymous namespace using different
+source files.
+<p>
+<a name="l73"></a>
+<h3 >4.1.2: Referring to entities</h3>
+    Given a namespace and its entities, the <a name="an276"></a>scope resolution operator can be
+used to refer to its entities. For example, the function <code >cos()</code>
+defined in the <code >CppAnnotations</code> namespace may be used as follows:
+        <pre>
+    // assume CppAnnotations namespace is declared in the
+    // following header file:
+    #include &lt;cppannotations&gt;
+
+    int main()
+    {
+        cout &lt;&lt; "The cosine of 60 degrees is: " &lt;&lt;
+                CppAnnotations::cos(60) &lt;&lt; '\n';
+    }
+</pre>
+<p>
+This is a rather cumbersome way to refer to the <code >cos()</code> function in the
+<code >CppAnnotations</code> namespace, especially so if the function is frequently
+used. In cases like these an <em >abbreviated</em> form can be
+used after specifying a <a name="an277"></a><em >using declaration</em>. Following
+        <pre>
+    using CppAnnotations::cos;  // note: no function prototype,
+                                // just the name of the entity
+                                // is required.
+</pre>
+<p>
+calling <code >cos</code> results in a call of the <code >cos</code> function defined in the
+<code >CppAnnotations</code> namespace. This implies that the standard <code >cos</code>
+function, accepting radians, is not automatically called anymore. To call that
+latter <code >cos</code> function the plain
+scope resolution operator should be used:
+        <pre>
+    int main()
+    {
+        using CppAnnotations::cos;
+        ...
+        cout &lt;&lt; cos(60)         // calls CppAnnotations::cos()
+            &lt;&lt; ::cos(1.5)       // call the standard cos() function
+            &lt;&lt; '\n';
+    }
+</pre>
+<p>
+A <code >using</code> declaration can have restricted scope. It can be used inside a
+block. The <code >using</code> declaration prevents the definition of entities having
+the same name as the one used in the <code >using</code> declaration. It is not possible
+to specify a <code >using</code> declaration for a variable <code >value</code> in some namespace,
+and to define (or declare) an identically named object in a block also
+containing a <code >using</code> declaration. Example:
+        <pre>
+    int main()
+    {
+        using CppAnnotations::value;
+        ...
+        cout &lt;&lt; value &lt;&lt; '\n';  // uses CppAnnotations::value
+        int value;              // error: value already declared.
+    }
+</pre>
+<p>
+<a name="l74"></a>
+<h4>4.1.2.1: The `using' directive</h4>
+        A generalized alternative to the <code >using</code> declaration is the
+<a name="an278"></a><em >using directive</em>:
+        <pre>
+    using namespace CppAnnotations;
+</pre>
+<p>
+Following this directive, <em >all</em> entities defined in the
+<code >CppAnnotations</code> namespace are used as if they were declared by <code >using</code>
+declarations.
+<p>
+While the <code >using</code> directive is a quick way to
+ <a name="an279"></a> import all the names of a namespace (assuming
+the namespace has previously been declared or defined), it is at the same time
+a somewhat dirty way to do so, as it is less clear what entity is actually
+used in a particular block of code.
+<p>
+If, e.g., <code >cos</code> is defined in the <code >CppAnnotations</code> namespace,
+<code >CppAnnotations::cos</code> is going to be used when <code >cos</code> is called. However,
+if <code >cos</code> is <em >not</em> defined in the <code >CppAnnotations</code> namespace, the
+standard <code >cos</code> function will be used. The <code >using</code> directive does not
+document as clearly as the <code >using</code> declaration what entity will actually be
+used. Therefore use caution when applying the <code >using</code> directive.
+<p>
+Namespace declarations are context sensitive: when a <code >using namespace</code>
+declaration is specified inside a compound statement then the declaration is
+valid until the compound statement's closing curly bracket has been
+encountered. In the next example a string <code >first</code> is defined without
+explicit specifying <code >std::string</code>, but once the compound statement has ended
+the scope of the <code >using namespace std</code> declaration has also ended, and so
+<code >std::</code> is required once again when defining <code >second</code>:
+        <pre>
+    #include &lt;string&gt;
+    int main()
+    {
+        {
+            using namespace std;
+            string first;
+        }
+        std::string second;
+    }
+</pre>
+<p>
+A <code >using namespace</code> directive cannot be used within the
+declaration block of a class- or enumeration-type. E.g., the following example
+won't compile:
+        <pre>
+    struct Namespace
+    {
+        using namespace std;      // won't compile
+    };
+</pre>
+<p>
+<a name="l75"></a>
+<h4>4.1.2.2: `Koenig lookup'</h4>
+        If <a name="an280"></a><em >Koenig lookup</em> were called the `Koenig principle', it could have been
+the title of a new <a name="an281"></a>Ludlum novel. However, it is not. Instead it refers to
+a <strong >C++</strong> technicality.
+<p>
+`Koenig lookup' refers to the fact that if a function is called without
+specifying its namespace, then the namespaces of its argument types are used
+to determine the function's namespace. If the namespace in which the argument
+types are defined contains such a function, then that function is used. This
+procedure is called the `Koenig lookup'.
+<p>
+As an illustration consider the next example. The function
+<code >FBB::fun(FBB::Value v)</code> is defined in the <code >FBB</code> namespace. It
+can be called without explicitly mentioning its namespace:
+        <pre>
+    #include &lt;iostream&gt;
+
+    namespace FBB
+    {
+        enum Value        // defines FBB::Value
+        {
+            FIRST
+        };
+
+        void fun(Value x)
+        {
+            std::cout &lt;&lt; "fun called for " &lt;&lt; x &lt;&lt; '\n';
+        }
+    }
+
+    int main()
+    {
+        fun(FBB::FIRST);    // Koenig lookup: no namespace
+                            // for fun() specified
+    }
+    /*
+        generated output:
+    fun called for 0
+    */
+</pre>
+    The compiler is rather smart when handling namespaces. If <code >Value</code> in the
+<code >namespace FBB</code> would have been defined as <code >typedef int Value</code> then
+<code >FBB::Value</code> would be recognized as <code >int</code>, thus causing the Koenig lookup
+to fail.
+<p>
+As another example, consider the next program. Here two namespaces are
+involved, each defining their own <code >fun</code> function. There is no
+ambiguity, since the argument defines the namespace and <code >FBB::fun</code> is
+called:
+        <pre>
+    #include &lt;iostream&gt;
+
+    namespace FBB
+    {
+        enum Value        // defines FBB::Value
+        {
+            FIRST
+        };
+
+        void fun(Value x)
+        {
+            std::cout &lt;&lt; "FBB::fun() called for " &lt;&lt; x &lt;&lt; '\n';
+        }
+    }
+
+    namespace ES
+    {
+        void fun(FBB::Value x)
+        {
+            std::cout &lt;&lt; "ES::fun() called for " &lt;&lt; x &lt;&lt; '\n';
+        }
+    }
+
+    int main()
+    {
+        fun(FBB::FIRST);    // No ambiguity: argument determines
+                            // the namespace
+    }
+    /*
+        generated output:
+    FBB::fun() called for 0
+    */
+</pre>
+<p>
+Here is an example in which there <em >is</em> an ambiguity: <code >fun</code> has two
+arguments, one from each namespace. The ambiguity must be resolved by the
+programmer:
+        <pre>
+    #include &lt;iostream&gt;
+
+    namespace ES
+    {
+        enum Value        // defines ES::Value
+        {
+            FIRST
+        };
+    }
+
+    namespace FBB
+    {
+        enum Value        // defines FBB::Value
+        {
+            FIRST
+        };
+
+        void fun(Value x, ES::Value y)
+        {
+            std::cout &lt;&lt; "FBB::fun() called\n";
+        }
+    }
+
+    namespace ES
+    {
+        void fun(FBB::Value x, Value y)
+        {
+            std::cout &lt;&lt; "ES::fun() called\n";
+        }
+    }
+
+    int main()
+    {
+        //  fun(FBB::FIRST, ES::FIRST); ambiguity: resolved by
+        //                              explicitly mentioning
+        //                              the namespace
+        ES::fun(FBB::FIRST, ES::FIRST);
+    }
+    /*
+        generated output:
+    ES::fun() called
+    */
+</pre>
+<p>
+An interesting subtlety with namespaces is that definitions in one
+namespace may break the code defined in another namespace. It shows that
+namespaces may affect each other and that namespaces may backfire if we're not
+aware of their peculiarities. Consider the following example:
+        <pre>
+    namespace FBB
+    {
+        struct Value
+        {};
+
+        void fun(int x);
+        void gun(Value x);
+    }
+
+    namespace ES
+    {
+        void fun(int x)
+        {
+            fun(x);
+        }
+        void gun(FBB::Value x)
+        {
+            gun(x);
+        }
+    }
+</pre>
+    Whatever happens, the programmer'd better not use any of the functions
+defined in the <code >ES</code> namespace, since that would result in infinite
+recursion. However, that's not the point. The point is that the programmer
+won't even be given the opportunity to call <code >ES::fun</code> since the compilation
+fails.
+<p>
+Compilation fails for <code >gun</code> but not for <code >fun</code>. But why is that so? Why
+is <code >ES::fun</code> flawlessly compiling while <code >ES::gun</code> isn't? In <code >ES::fun</code>
+<code >fun(x)</code> is called. As <code >x</code>'s type is not defined in a namespace the Koenig
+lookup does not apply and <code >fun</code> calls itself with infinite recursion.
+<p>
+With <code >ES::gun</code> the argument is defined in the <code >FBB</code>
+namespace. Consequently, the <code >FBB::gun</code> function is a possible candidate to
+be called. But <code >ES::gun</code> itself also is possible as <code >ES::gun</code>'s prototype
+perfectly matches the call <code >gun(x)</code>.
+<p>
+Now consider the situation where <code >FBB::gun</code> has not yet been
+declared. Then there is of course no ambiguity. The programmer responsible for
+the <code >ES</code> namespace is resting happily. Some time after that the programmer
+who's maintaining the <code >FBB</code> namespace decides it may be nice to add a
+function <code >gun(Value x)</code> to the <code >FBB</code> namespace. Now suddenly the code in
+the namespace <code >ES</code> breaks because of an addition in a completely other
+namespace (<code >FBB</code>). Namespaces clearly are not completely independent of each
+other and we should be aware of subtleties like the above. Later in the
+<strong >C++</strong> Annotations (chapter <a href="cplusplus11.html#OVERLOADING">11</a>) we'll return to this issue.
+<p>
+<em >Koenig lookup</em> is only used in the context of namespaces. If a function
+is defined outside of a namespace, defining a parameter of a type that's
+defined inside a namespace, and that namespace also defines a function with an
+identical signature, then the compiler reports an ambiguity when that function
+is called. Here is an example, assuming the abovementioned namespace <code >FBB</code>
+is also available:
+        <pre>
+    void gun(FBB::Value x);
+
+    int main(int argc, char **argv)
+    {
+        gun(FBB::Value{});          // ambiguity: FBB::gun and ::gun can both
+                                    // be called.
+    }
+</pre>
+<p>
+<a name="l76"></a>
+<h3 >4.1.3: The standard namespace</h3>
+    The <code >std</code> namespace is reserved by <strong >C++</strong>. The standard defines many
+entities that are part of the runtime available software (e.g., <code >cout, cin,
+cerr</code>); the templates defined in the <em >Standard Template Library</em> (cf.
+chapter <a href="cplusplus18.html#STL">18</a>); and the <em >Generic Algorithms</em> (cf. chapter <a href="cplusplus19.html#GENERIC">19</a>)
+are defined in the <code >std</code> namespace.
+<p>
+Regarding the discussion in the previous section, <code >using</code>
+declarations may be used when referring to entities in the <code >std</code> namespace.
+For example, to use the <code >std::cout</code>
+stream, the code may declare this object as follows:
+        <pre>
+    #include &lt;iostream&gt;
+    using std::cout;
+</pre>
+<p>
+Often, however, the identifiers defined in the <code >std</code> namespace can all
+be accepted without much thought. Because of that, one frequently encounters a
+<code >using</code> directive, allowing the programmer to omit a namespace prefix when
+referring to any of the entities defined in the namespace specified with the
+<code >using</code> directive. Instead of specifying  <code >using</code> declarations the
+following <code >using</code> directive is frequently encountered:
+construction like
+        <pre>
+    #include &lt;iostream&gt;
+    using namespace std;
+</pre>
+<p>
+Should a <code >using</code> directive, rather than <code >using</code> declarations be used?
+As a <a name="an282"></a>rule of thumb one might decide to stick to <code >using</code> declarations, up
+to the point where the list becomes impractically long, at which point a
+<code >using</code> directive could be considered.
+<p>
+Two <a name="an283"></a> restrictions apply to <code >using</code> directives and
+declarations:
+    <ul>
+    <li> Programmers should not declare or define anything inside the
+<code >namespace std</code>. This is <em >not</em> compiler enforced but is imposed upon user
+code by the standard;
+    <li> <code >Using</code> declarations and directives should not be imposed upon
+code written by third parties. In practice this means that <code >using</code>
+directives and declarations should be banned from header files and should only
+be used in source files (cf. section <a href="cplusplus07.html#NAMESPACEHDR">7.11.1</a>).
+    </ul>
+<p>
+<a name="l77"></a>
+<h3 >4.1.4: Nesting namespaces and namespace aliasing</h3>
+    Namespaces can be nested. Here is an example:
+        <pre>
+    namespace CppAnnotations
+    {
+        int value;
+        namespace Virtual
+        {
+            void *pointer;
+        }
+    }
+</pre>
+<p>
+The variable <code >value</code> is defined in the <code >CppAnnotations</code>
+namespace. Within the <code >CppAnnotations</code> namespace another namespace
+(<code >Virtual</code>) is nested. Within that latter namespace the variable
+<code >pointer</code> is defined. To refer to these
+variable the following options are available:
+    <ul>
+    <li> The <a name="an284"></a><em >fully qualified names</em> can be used. A
+        fully qualified name of an entity is a list of all the namespaces that
+        are encountered until reaching the definition of the entity. The
+        namespaces and entity are glued together by the scope resolution
+        operator:
+   <pre>
+int main()
+{
+    CppAnnotations::value = 0;
+    CppAnnotations::Virtual::pointer = 0;
+}
+</pre>
+<p>
+<li> A <code >using namespace CppAnnotations</code> directive can be provided. Now
+        <code >value</code> can be used without any prefix, but <code >pointer</code> must be used
+        with the <code >Virtual::</code> prefix:
+   <pre>
+using namespace CppAnnotations;
+
+int main()
+{
+    value = 0;
+    Virtual::pointer = 0;
+}
+</pre>
+<p>
+<li> A <code >using namespace</code> directive for the full namespace chain can be
+        used. Now <code >value</code> needs its <code >CppAnnotations</code> prefix again, but
+        <code >pointer</code> doesn't require a prefix anymore:
+   <pre>
+using namespace CppAnnotations::Virtual;
+
+int main()
+{
+    CppAnnotations::value = 0;
+    pointer = 0;
+}
+</pre>
+<p>
+<li> When using two separate <code >using namespace</code> directives none of the
+        namespace prefixes are required anymore:
+   <pre>
+using namespace CppAnnotations;
+using namespace Virtual;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+</pre>
+<p>
+<li> The same can be accomplished (i.e., no namespace prefixes) for
+        specific variables by providing specific <code >using</code> declarations:
+   <pre>
+using CppAnnotations::value;
+using CppAnnotations::Virtual::pointer;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+</pre>
+<p>
+<li> A combination of <code >using namespace</code> directives and <code >using</code>
+        declarations can also be used. E.g., a <code >using namespace</code> directive
+        can be used for the <code >CppAnnotations::Virtual</code> namespace, and a
+        <code >using</code> declaration can be used for the <code >CppAnnotations::value</code>
+        variable:
+   <pre>
+using namespace CppAnnotations::Virtual;
+using CppAnnotations::value;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+</pre>
+<p>
+</ul>
+<p>
+Following a <code >using namespace</code> directive all entities of that namespace
+can be used without any further prefix. If a single <code >using namespace</code>
+directive is used to refer to a nested namespace, then all entities of that
+nested namespace can be used without any further prefix. However, the entities
+defined in the more shallow namespace(s) still need the shallow namespace's
+name(s). Only after providing specific <code >using namespace</code> directives or
+<code >using</code> declarations namespace qualifications can be omitted.
+<p>
+When fully qualified names are preferred but a long name like
+        <pre>
+    CppAnnotations::Virtual::pointer
+</pre>
+<p>
+is considered too long, a <a name="an285"></a><em >namespace alias</em> may be used:
+        <pre>
+    namespace CV = CppAnnotations::Virtual;
+</pre>
+<p>
+This defines <code >CV</code> as an <em >alias</em> for the full name. The
+variable <code >pointer</code> may now be accessed using:
+        <pre>
+    CV::pointer = 0;
+</pre>
+<p>
+A namespace alias can also be used in a <code >using namespace</code> directive or
+<code >using</code> declaration:
+        <pre>
+    namespace CV = CppAnnotations::Virtual;
+    using namespace CV;
+</pre>
+<p>
+<strong >Nested namespace definitions</strong>
+<p>
+Starting with the C++17 standard, when nesting namespaces a nested
+namespace can directly be referred to using scope resolution operators. E.g.,
+        <pre>
+    namespace Outer::Middle::Inner
+    { 
+        // entities defined/declared here are defined/declared in the Inner
+        // namespace, which is defined in the Middle namespace, which is
+        // defined in the Outer namespace
+    }
+</pre>
+<p>
+<a name="OUTSIDE"></a><a name="l78"></a>
+<h4>4.1.4.1: Defining entities outside of their namespaces</h4>
+        It is not strictly necessary to <a name="an286"></a>define members of namespaces inside a
+namespace region. But before an entity is defined <em >outside</em> of a namespace
+it must have been declared <em >inside</em> its namespace.
+<p>
+To define an entity outside of its namespace its name must be <em >fully
+qualified</em> by prefixing the member by its namespaces. The definition may be
+provided at the global level or at intermediate levels in the case of nested
+namespaces. This allows us to define an entity belonging to namespace <code >A::B</code>
+within the region of namespace <code >A</code>.
+<p>
+Assume the type <code >int INT8[8]</code> is defined in the <code >CppAnnotations::Virtual</code>
+namespace. Furthermore assume that it is our intent to define a function
+<code >squares</code>, inside the namespace <br/>
+ <code >CppAnnotations::Virtual</code> returning a
+pointer to <code >CppAnnotations::Virtual::INT8</code>.
+<p>
+Having defined the prerequisites within the <code >CppAnnotations::</code><code >Virtual</code>
+namespace, our function could be defined as follows (cf. chapter <a href="cplusplus09.html#MEMORY">9</a>
+for coverage of the memory allocation operator <code >new[]</code>):
+        <pre>
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *squares()
+            {
+                INT8 *ip = new INT8[1];
+
+                for (size_t idx = 0; idx != sizeof(INT8) / sizeof(int); ++idx)
+                    (*ip)[idx] = (idx + 1) * (idx + 1);
+
+                return ip;
+            }
+        }
+    }
+</pre>
+<p>
+The function <code >squares</code> defines an array of one <code >INT8</code> vector, and
+returns its address after initializing the vector by the squares of the first
+eight natural numbers.
+<p>
+Now the function <code >squares</code> can be defined outside of the
+<code >CppAnnotations::</code><code >Virtual</code> namespace:
+        <pre>
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *squares();
+        }
+    }
+
+    CppAnnotations::Virtual::INT8 *CppAnnotations::Virtual::squares()
+    {
+        INT8 *ip = new INT8[1];
+
+        for (size_t idx = 0; idx != sizeof(INT8) / sizeof(int); ++idx)
+            (*ip)[idx] = (idx + 1) * (idx + 1);
+
+        return ip;
+    }
+</pre>
+<p>
+In the above code fragment note the following:
+    <ul>
+    <li><code >squares</code> is declared inside of the <code >CppAnnotations::Virtual</code>
+namespace.
+    <li><code ></code> The definition outside of the namespace region requires us to use
+the fully qualified name of the function <em >and</em> of its return type.
+    <li><code ></code> <em >Inside</em> the body of the function <code >squares</code> we are within the
+<code >CppAnnotations::</code><code >Virtual</code> namespace, so inside the function fully
+qualified names (e.g., for <code >INT8</code>) are not required any more.
+    </ul>
+<p>
+Finally, note that the function could also have been defined in the
+<code >CppAnnotations</code> region. In that case the <code >Virtual</code> namespace would have
+been required when defining <code >squares()</code> and when specifying its return type,
+while the internals of the function would remain the same:
+        <pre>
+    namespace CppAnnotations
+    {
+        namespace Virtual
+        {
+            void *pointer;
+
+            typedef int INT8[8];
+
+            INT8 *squares();
+        }
+
+        Virtual::INT8 *Virtual::squares()
+        {
+            INT8 *ip = new INT8[1];
+
+            for (size_t idx = 0; idx != sizeof(INT8) / sizeof(int); ++idx)
+                (*ip)[idx] = (idx + 1) * (idx + 1);
+
+            return ip;
+        }
+    }
+</pre>
+<p>
+<a name="TIMESPEC"></a><a name="l79"></a>
+<h2 >4.2: The std::chrono namespace (handling time)</h2>
+The <strong >C</strong> programming language offers tools like <strong >sleep</strong>(3) and
+<strong >select</strong>(2) to suspend program execution for a certain amount of time. And
+of course the family of <strong >time</strong>(3) functions for setting and displaying time
+<p>
+<code >Sleep</code> and <code >select</code> can be used for waiting, but as they were designed in
+an era when multi threading was unavailable, their usefulness is
+limited when used in multi threaded programs. Multi threading has become part
+of <strong >C++</strong> (covered in detail in chapter <a href="cplusplus20.html#THREADING">20</a>), and additional
+time-related functions are available in the <code >std::filesystem</code> namespace,
+covered below in this chapter. 
+<p>
+In multi threaded programs threads are frequently suspended, albeit usually
+for a very short time. E.g., when a thread wants to access a variable, but the
+variable is currently being updated by another thread, then the former thread
+should wait until the latter thread has completed the update. Updating a
+variable usually doesn't take much time, but if it takes an unexpectedly long
+time, then the former thread may want to be informed about that, so it can do
+something else while the latter thread is busy updating the
+variable. Interactions between threads like these cannot be realized with
+functions like <code >sleep</code> and <code >select</code>.
+<p>
+The <a name="an287"></a><code >std::chrono</code> namespace bridges the gap between the
+traditionally available time-related functions and the time-related
+requirements of multi-threading and of the <code >std::filesystem</code> name
+space. All but the specific <code >std::filesystem</code> related time functionality is
+available after including the <a name="an288"></a><code >&lt;chrono&gt;</code> header file. After including the 
+<a name="an289"></a><code >&lt;filesystem&gt;</code> header file the facilities of the <code >std::filesystem</code> are
+available. 
+<p>
+Time can be measured in various resolutions: in Olympic games time differences
+of hundreds of seconds may make the distinction between a gold and silver
+medal, but when planning a vacation we might talk about months before we go on
+vacation. Time resolutions are specified through objects of the class
+<code >std::ratio</code>, which (apart from including the <code >&lt;chrono&gt;</code> header file) is
+also available after including the <code >&lt;ratio&gt;</code> header file.
+<p>
+Different events usually last for different amounts of time (given a specific
+time resolution). Amounts of time are specified through objects of 
+the class <code >std::chrono::duration</code>.
+<p>
+Events can also be characterized by their points in time: midnight, January 1,
+1970 GMT is a point in time, as is 19:00, December 5, 2010. Points in time are
+specified through objects of the class <code >std::chrono::time_point</code>. 
+<p>
+It's not just that resolutions, durations of events, and points in time of
+events may differ, but the devices (clocks) we use for specifying time also
+differ. In the old days <em >hour glasses</em> were used (and sometimes they're
+still used when boiling eggs), but on the other hand we may use atomic clocks
+when measurements should be very precise. Four different types of clocks are
+available. The commonly used clock is  <code >std::chrono::system_clock</code>, but in
+the context of the file system there's also an (implicitly defined)
+<code >filesystem::__file_clock</code>.
+<p>
+In the upcoming sections the details of the <code >std::chrono</code> namespace are
+covered. First we look at characteristics of time resolutions. How to
+handle amounts of time given their resolutions is covered next. The next
+section describes facilities for defining and handling time-points. The
+relationships between these types and the various clock-types are covered
+thereafter. 
+<p>
+In this chapter the specification <code >std::chrono::</code> is often omitted (in
+practice <code >using namespace std</code> followed by <code >using namespace chrono</code> is
+commonly used; <code >[std::]chrono::</code> specifications are occasionally used to
+avoid ambiguities). Also, every now and then you'll encounter <em >forward
+references</em> to later chapters, like the reference to the chapter about
+multi-threading. These are hard to avoid, but studying those chapters
+at this point fortunately can be postponed without loss of continuity.
+<p>
+<a name="l80"></a>
+<h3 >4.2.1: Time resolutions: std::ratio</h3>
+    Time resolutions (or <em >units of time</em>) are essential components of time
+specifications. Time resolutions are defined through objects of the class
+    <a name="an290"></a><code >std::ratio</code>. 
+<p>
+Before the class <code >ratio</code> can be used, the <a name="an291"></a><code >&lt;ratio&gt;</code> header file must be
+included. Instead the <code >&lt;chrono&gt;</code> header file can be included.
+<p>
+The class <code >ratio</code> requires two <em >template arguments</em>. These are positive
+integral numbers surrounded by pointed brackets defining, respectively, the
+numerator and denominator of a fraction (by default the denominator equals
+1). Examples:
+        <pre>
+    ratio&lt;1&gt;        - representing one; 
+    ratio&lt;60&gt;       - representing 60
+    ratio&lt;1, 1000&gt;  - representing 1/1000.
+</pre>
+<p>
+The class <code >ratio</code> defines two directly accessible static data
+members: <code >num</code><a name="an292"></a> represents its numerator, <code >den</code><a name="an293"></a>
+its denominator. A <code >ratio</code> definition by itself simply defines a certain
+amount. E.g., when executing the following program
+        <pre>
+    #include &lt;ratio&gt;
+    #include &lt;iostream&gt;
+    using namespace std;
+
+    int main()
+    {
+        cout &lt;&lt; ratio&lt;5, 1000&gt;::num &lt;&lt; ',' &lt;&lt; ratio&lt;5, 1000&gt;::den &lt;&lt; '\n' &lt;&lt;
+                milli::num &lt;&lt; ',' &lt;&lt; milli::den &lt;&lt; '\n';
+    }
+</pre>
+<p>
+the text 1,200 is displayed, as that's the `amount' represented by
+<code >ratio&lt;5, 1000&gt;</code>: <code >ratio</code> simplifies the fraction whenever possible.
+<p>
+A fairly large number of predefined <code >ratio</code> types exist. They are, like
+<code >ratio</code> itself, defined in the standard namespace and can be used instead of
+the more cumbersome <code >ratio&lt;x&gt;</code> or <code >ratio&lt;x, y&gt;</code> specification:
+    <div style="text-align: center"><table style="margin-left:auto;margin-right:auto;">
+
+    <tr><td colspan=8><hr/></td></tr>
+
+    
+<tr >
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an294"></a>yocto</td>  <td > 10<sup >-24</sup></td> <td > <blockquote ></blockquote></td>
+                     <td > <a name="an295"></a>zepto</td>  <td > 10<sup >-21</sup></td> <td > <blockquote ></blockquote></td> <td colspan=2 style="text-align: center" ></td>
+ 
+</tr>
+
+    <tr><td colspan=8><hr/></td></tr>
+
+    
+<tr >
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an296"></a>atto</td>  <td > 10<sup >-18</sup></td> <td > </td>
+        <td > <a name="an297"></a>femto</td> <td > 10<sup >-15</sup></td> <td > </td>
+        <td > <a name="an298"></a>pico</td>  <td > 10<sup >-12</sup></td>
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an299"></a>nano</td>  <td > 10<sup >-9</sup></td> <td > </td>
+        <td > <a name="an300"></a>micro</td> <td > 10<sup >-6</sup></td> <td > </td>
+        <td > <a name="an301"></a>milli</td> <td > 10<sup >-3</sup></td>
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an302"></a>centi</td> <td > 10<sup >-2</sup></td> <td > </td>
+        <td > <a name="an303"></a>deci</td>  <td > 10<sup >-1</sup></td> 
+</tr>
+
+    <tr><td colspan=8><hr/></td></tr>
+
+    
+<tr >
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an304"></a>deca</td>  <td > 10<sup >1</sup></td> <td > </td>
+        <td > <a name="an305"></a>hecto</td> <td > 10<sup >2</sup></td> <td > </td>
+        <td > <a name="an306"></a>kilo</td>  <td > 10<sup >3</sup></td>
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an307"></a>mega</td>  <td > 10<sup >6</sup></td> <td > </td>
+        <td > <a name="an308"></a>giga</td>  <td > 10<sup >9</sup></td> <td > </td>
+        <td > <a name="an309"></a>tera</td>  <td > 10<sup >12</sup></td>
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an310"></a>peta</td>  <td > 10<sup >15</sup></td> <td > </td>
+        <td > <a name="an311"></a>exa</td>   <td > 10<sup >18</sup></td> 
+</tr>
+
+    <tr><td colspan=8><hr/></td></tr>
+
+    
+<tr >
+ 
+</tr>
+
+    
+<tr >
+<td > <a name="an312"></a>zetta</td>   <td > 10<sup >21</sup></td> <td > </td>
+        <td > <a name="an313"></a>yotta</td>   <td > 10<sup >24</sup></td> 
+</tr>
+
+    <tr><td colspan=8><hr/></td></tr>
+
+    
+</table></div>
+ (<em >note:</em> the definitions of the types <code >yocto, zepto, zetta</code> and <code >yotta</code>
+use integral constants exceeding 64 bits. Although these constants are defined
+in <strong >C++</strong>, they are not available on 64 bit or smaller architectures.)
+<p>
+Time related ratios can very well be interpreted as fractions or multiple of
+seconds, with <code >ratio&lt;1, 1&gt;</code> representing a resolution of one second.
+<p>
+Here is an example showing how these abbreviations can be used:
+        <pre>
+        cout &lt;&lt; milli::num &lt;&lt; ',' &lt;&lt; milli::den &lt;&lt; '\n' &lt;&lt;
+                kilo::num &lt;&lt; ',' &lt;&lt; kilo::den &lt;&lt; '\n';
+</pre>
+<p>
+<a name="DURATION"></a><a name="l81"></a>
+<h3 >4.2.2: Amounts of time: std::chrono::duration</h3>
+    Amounts of time are specified through objects of the class
+    <a name="an314"></a><code >std::chrono::duration</code>.
+<p>
+Before using the class <code >duration</code> the <a name="an315"></a><code >&lt;chrono&gt;</code> header file must be
+included.
+<p>
+Like <code >ratio</code> the class <code >duration</code> requires two template
+arguments. A numeric type (<code >int64_t</code> is normally used) defining the type
+holding the duration's amount of time, and a time-resolution (called its
+<em >resolution</em>), usually specified through a <code >std::ratio</code>-type (often using
+one of its <code >chrono</code> abbreviations). 
+<p>
+Using the predefined <code >std::deca ratio</code>, representing units of 10 seconds an
+interval of 30 minutes is defined as follows:
+        <pre>
+    duration&lt;int64_t, std::deca&gt; halfHr(180);
+</pre>
+<p>
+Here <code >halfHr</code> represents a time interval of 180 deca-seconds, so 1800
+seconds. Comparable to the predefined ratios predefined duration types are
+available:
+    <div style="text-align: center">
+    <table class="XXfc"  >
+    <tr><td colspan=3><hr/></td></tr>
+<tr >
+    <td class="XXtl "; ><a name="an316"></a>nanoseconds</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t, nano&gt;</code></td>
+</tr>
+<tr >
+    <td class="XXtl "; ><a name="an317"></a>microseconds</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t, micro&gt;</code></td>
+</tr>
+<tr >
+    <td class="XXtl "; ><a name="an318"></a>milliseconds</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t, milli&gt;</code></td>
+</tr>
+<tr >
+    <td class="XXtl "; ><a name="an319"></a>seconds</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t&gt;</code></td>
+</tr>
+<tr >
+    <td class="XXtl "; ><a name="an320"></a>minutes</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t, ratio&lt;60&gt;&gt;</code></td>
+</tr>
+<tr >
+    <td class="XXtl "; ><a name="an321"></a>hours</td>
+    <td class="XXtl "; >&nbsp;</td>
+    <td class="XXtl "; ><code >duration&lt;int64_t, ratio&lt;3600&gt;&gt;</code></td>
+</tr>
+    <tr><td colspan=3><hr/></td></tr>
+</table>
+</div>
+    Using these types, a time amount of 30 minutes can now simply be defined
+as <code >minutes halfHour(30)</code>.
+<p>
+The two types that were specified when defining a <code >duration&lt;Type,
+Resolution&gt;</code>  can be retrieved as,
+respectively,
+    <ul>
+    <li><code >rep</code>, which is equivalent to the numeric type (like
+        <code >int64_t</code>). E.g., <code >seconds::rep</code> is equivalent to <code >int64_t</code>;
+<p>
+<li><code >period</code>, which is equivalent to the <code >ratio</code> type (like <code >kilo</code>) and
+        so <code >duration&lt;int, kilo&gt;::period::num</code> is equal to 1.
+    </ul>
+<p>
+
+Duration objects can be constructed by specifying an argument of its numeric
+type:
+    <ul>
+    <li><code >duration(Type const &amp;value)</code>:<br/>
+        a specific duration of <code >value</code> time units. <code >Type</code> refers to
+        the duration's numeric type (e.g., <code >int64_t</code>). So, when defining
+        <pre>
+    minutes halfHour(30);
+</pre>
+<p>
+the argument 30 is stored inside its <code >int64_t</code> data member.
+    </ul>
+    Duration supports copy- and move-constructors (cf. chapter <a href="cplusplus09.html#MEMORY">9</a>)
+and its default constructor initializes its <code >int64_t</code> data member to zero.
+<p>
+The amount of time stored in a duration object may be modified by adding or
+subtracting two duration objects or by multiplying, dividing, or computing a
+modulo value of its data member. Numeric multiplication operands may be used as
+left-hand side or right-hand side operands; in combination with the other
+multiplication operators the numeric operands must be used as right-hand side
+operands. Compound assignment operators are also available. Some examples:
+        <pre>
+    minutes fullHour = minutes{ 30 } + halfHour;
+    fullHour = 2 * halfHour;
+    halfHour = fullHour / 2;
+    fullHour = halfHour + halfHour;
+
+    halfHour /= 2;
+    halfHour *= 2;
+</pre>
+<p>
+In addition, <code >duration</code> offers the following members (the first member is an
+ordinary member function requiring a <code >duration</code> object). The other three are
+static members (cf. chapter <a href="cplusplus08.html#StaticDataFun">8</a>) which can be used without
+requiring objects (as shown at the <code >zero</code> code snippet):
+    <ul>
+    <li><code >Type count() const</code> returns the value that is stored inside
+        the <code >duration</code> object's data member. For <code >halfHour</code> it returns 30,
+        not 1800;
+<p>
+<li><code >duration&lt;Type, Resolution&gt;::zero()</code>:<br/> 
+        this is an (immutable) duration object whose <code >count</code> member returns
+        0. E.g.:
+      <pre>
+    seconds::zero().count();    // equals int64_t 0
+</pre>
+<p>
+<li><code >duration&lt;Type, Resolution&gt;::min()</code>:<br/>
+        an immutable duration object whose <code >count</code> member returns the lowest
+        value of its <code >Type</code> (i.e., <code >std::numeric_limits&lt;Type&gt;::min()</code>
+        (cf. section <a href="cplusplus21.html#NUMLIM">21.11</a>));
+<p>
+<li><code > duration&lt;Type, Resolution&gt;::max()</code>:<br/>
+        an immutable duration object whose <code >count</code> member returns the lowest
+        value of its <code >Type</code> (i.e., <code >std::numeric_limits&lt;Type&gt;::max()</code>).
+    </ul>
+<p>
+Duration objects using different resolutions may be combined as long as
+no precision is lost. When duration objects using different resolutions 
+are combined the resulting resolution is the finer of the two. When compound
+binary operators are used the receiving object's resolution must be the finer
+or the compilation fails.
+        <pre>
+    minutes halfHour{ 30 };
+    hours oneHour{ 1 };
+
+    cout &lt;&lt; (oneHour + halfHour).count();   // displays: 90
+
+    halfHour += oneHour;            // OK
+    // oneHour += halfHours;        // won't compile
+</pre>
+<p>
+The suffixes <code >h, min, s, ms, us, ns</code> can be used for integral
+values, creating the corresponding <code >duration</code> time intervals. E.g., 
+<code >minutes min = 1h</code> stores 60 in <code >min</code>.
+<p>
+<a name="CLOCKS"></a><a name="l82"></a>
+<h3 >4.2.3: Clocks measuring time</h3>
+    Clocks are used for measuring time. <strong >C++</strong> offers several predefined
+<a name="an322"></a><em >clock</em> types, and all but one of them are defined in the <code >std::chrono</code>
+namespace. The exception is the clock <code >std::filesystem::__file_clock</code> (see
+section <a href="cplusplus04.html#FILECLOCK">4.3.1</a> for its details).
+<p>
+Before using the <code >chrono</code> clocks the <a name="an323"></a><code >&lt;chrono&gt;</code> header file must be
+included.
+<p>
+We need clock types when defining points in time (see the next section).  All
+predefined clock types define the following types:
+    <ul>
+    <li> the clock's duration type: <code >Clock::duration</code> (predefined clock
+        types use <code >nanoseconds</code>). E.g., <code >system_clock::duration
+        oneDay{ 24h }</code>;
+<p>
+<li> the clock's resolution type: <code >Clock::period</code>
+        (predefined clock types use <code >nano</code>). E.g.,
+        <code >cout &lt;&lt; system_clock::period::den &lt;&lt; '\n'</code>;
+<p>
+<li> the clock's type that is used to store amounts of time:
+        <code >Clock::rep</code> (predefined clock types use
+        <code >int64_t</code>). E.g., <code >system_clock::rep amount = 0</code>;
+<p>
+<li> the clock's type that is used to store time points (described in the
+        next section): <code >Clock::time_point</code> (predefined clock types use
+        <code >time_point&lt;system_clock, nanoseconds&gt;</code>) E.g.,
+        <code >system_clock::time_point start</code>.
+    </ul>
+<p>
+All predefined clock types have a member <a name="an324"></a><code >now</code> returning the clock's
+<code >time_point</code> corresponding to the current time (relative to the clock's
+epoch). It is a static member and can be used
+this way:
+    <code >system_clock::time_point tp = system_clock::now()</code>.
+<p>
+There are three predefined clock types in the chrono namespace:
+    <ul>
+        <li><a name="an325"></a><code >system_clock</code> is the `wall clock', using the system's real time
+            clock;
+        <li><a name="an326"></a><code >steady_clock</code> is a clock whose time increases in parallel with the
+            increase of real time;
+        <li><a name="an327"></a><code >high_resolution_clock</code> is the computer's fastest clock (i.e., the
+            clock having the shortest timer-tick interval). In practice this is
+            the same clock as <code >system_clock</code>.
+    </ul>
+<p>
+The <code >__file_clock</code> is defined in the <code >std::filesystem</code> namespace (
+covered in section <a href="cplusplus04.html#FILECLOCK">4.3.1</a>).
+<p>
+In addition to <code >now</code> the classes <code >system_clock</code> and
+<code >high_resolution_clock</code> (referred to as <code >Clock</code> below) offer these two
+static members:
+    <ul>
+    <li><a name="an328"></a><code >std::time_t Clock::to_time_t(Clock::time_point const &amp;tp)</code><br/>
+         a <code >std::time_t</code><a name="an329"></a> value (the same type as returned
+by <strong >C</strong>'s <strong >time</strong>(2) function) representing the same point in
+time as <code >timePoint</code>. 
+<p>
+<li><a name="an330"></a><code >Clock::time_point Clock::from_time_t(std::time_t
+seconds)</code><br/> 
+    a <code >time_point</code> representing the same point in time as <code >time_t</code>.
+    </ul>
+<p>
+The example illustrates how these functions can be called:
+        <pre>
+    system_clock::from_time_t(
+        system_clock::to_time_t(
+            system_clock::from_time_t(
+                time(0);
+            )
+        )
+    );
+</pre>
+<p>
+<a name="TIMEPOINT"></a><a name="l83"></a>
+<h3 >4.2.4: Points in time: std::chrono::time_point</h3>
+    Single moments in time can be specified through objects of 
+the class <a name="an331"></a><code >std::chrono::time_point</code>.
+<p>
+Before using the class <code >time_point</code> the <a name="an332"></a><code >&lt;chrono&gt;</code> header file must be
+included.
+<p>
+Like <code >duration</code> the class <code >time_point</code> requires two template arguments: A
+clock type and a duration type. Usually <code >system_clock</code> is used as the
+clock's type using <code >nanoseconds</code> as the default duration type (it may be
+omitted if <code >nanoseconds</code> is the intended duration type). Otherwise specify
+the duration type as the <code >time_point's</code> second template argument. The
+following two time point definitions therefore use identifcal time point
+types:
+        <pre>
+    time_point&lt;standard_clock, nanoseconds&gt; tp1;
+    time_point&lt;standard_clock&gt; tp2;
+</pre>
+<p>
+The class <code >time_point</code> supports three constructors:
+    <ul>
+    <li><code >time_point()</code>:<br/>
+       the default constructor is initialized to the beginning of the clock's
+        <a name="an333"></a><em >epoch</em>. For <code >system_clock</code> it is January, 1, 1970, 00:00h, but
+        notice that <code >filesystem::__file_clock</code> uses a different epoch
+        (see section <a href="cplusplus04.html#FILECLOCK">4.3.1</a> below);
+<p>
+<li><code >time_point(time_point&lt;Clock, Duration&gt; const &amp;other)</code>:<br/>
+       the copy constructor (cf. chapter <a href="cplusplus09.html#MEMORY">9</a>) initializes a
+        <code >time_point</code> object using the time point defined by <code >other</code>. If
+        <code >other's</code> resolution uses a larger period than the period of the
+        constructed object then <code >other's</code> point in time is represented in
+        the constructed object's resolution (an illustration is provided
+        below, at the description of the member <code >time_since_epoch</code>);
+<p>
+<li><code >time_point(time_point&lt;Clock, Duration&gt; const &amp;&amp;tmp)</code>:<br/>
+       the move constructor (cf. chapter <a href="cplusplus09.html#MEMORY">9</a>) acts comparably to the
+        copy constructor, converting <code >tmp's</code> resolution to the constructed
+        object while moving <code >tmp</code> to the constructed object.
+    </ul>
+<p>
+The following operators and members are available:
+    <ul>
+    <li><code >time_point &amp;operator+=(duration const &amp;amount)</code>:<br/>
+       The amount of time represented by <code >amount</code> is added to the current
+        <code >time_point</code> object. This operator is also available as binary
+        arithmetic operator using a <code >time_point const &amp;</code> and a <code >duration
+        const &amp;</code> operand (in any order). Example:
+       <pre>
+    system_clock::now() + seconds{ 5 };
+</pre>
+<p>
+<li><code >time_point &amp;operator-=(duration const &amp;amount)</code>:<br/>
+       The amount of time represented by <code >amount</code> is subtracted from the
+        current <code >time_point</code> object. This operator is also available as
+        binary arithmetic operator using a <code >time_point const &amp;</code> and a
+        <code >duration const &amp;</code> operand (in any order). Example:
+       <pre>
+    time_point&lt;system_clock&gt; point = system_clock::now();
+    point -= seconds{ 5 };
+</pre>
+<p>
+<li><a name="an334"></a><code >duration time_since_epoch() const</code>:<br/>
+       <code >duration</code> is the duration type used by the time point object for
+        which this member is called. It returns the amount of time
+        since the epoch that's represented by the object.
+<p>
+<li><code >time_point min() const</code>:<br/>
+       a static member returning the time point's <code >duration::min</code>
+        value. Example:
+       <pre>
+    cout &lt;&lt; 
+        time_point&lt;system_clock&gt;::min().time_since_epoch().count() &lt;&lt; '\n';
+        // shows -9223372036854775808
+</pre>
+<p>
+<li><code >time_point max() const</code>:<br/> 
+       a static member returning the time point's <code >duration::max</code>
+        value.
+    </ul>
+<p>
+All predefined clocks use nanoseconds as their time resolution. To express the
+time in a less precise resolution take one unit of time of the less precise
+resolution (e.g., <code >hours(1)</code>) and convert it to nanoseconds. Then divide the
+value returned by the time point's <code >time_since_epoch().count()</code> member by
+<code >count</code> member of the less precise resolution converted to
+nanoseconds. Using this procedure the number of hours passed since the
+beginning of the epoch can be determined:
+        <pre>
+    cout &lt;&lt; system_clock::now().time_since_epoch().count() /
+            nanoseconds(hours(1)).count() &lt;&lt; 
+            " hours since the epoch\n";
+</pre>
+<p>
+Time point objects based on the system clock or on the high resolution clock
+can be converted to <code >std::time_t</code> (or the equivalent type <code >time_t</code>)
+values. Such <code >time_t</code> values are used when converting time to text. For such
+conversions the <em >manipulator</em> <code >put_time</code> (cf. section <a href="cplusplus06.html#IOFORMAT">6.3.2</a>) is
+commonly used, but <code >put_time</code> must be provided with the address of a
+<code >std::tm</code> object, which in turn can be obtained from a <code >std::time_t</code>
+value. The whole process is fairly complex, and the core elements are
+visualized in figure <a href="cplusplus04.html#TIMEIMG">3</a>.
+    <p><a name="TIMEIMG"></a><figure >
+<img src="threading/time.gif" >
+<figcaption >Figure 3: Time according to <strong >C++</strong></figcaption>
+</figure></p>
+
+<p>
+The essential step eventually leading to the insertion of a time point's value
+into a <code >std::ostream</code> consists of using
+<code >system_clock::to_time_t(time_point&lt;system_clock&gt; const &amp;tp)</code> to convert a
+time point to a <code >time_t</code> value (instead of using <code >system_clock</code> the
+<code >high_resolution_clock</code> can also be used). How a time point can be inserted
+into a <code >std::ostream</code> is described in section <a href="cplusplus06.html#PUTTIME">6.4.4</a>.
+<p>
+<a name="STDFS"></a><a name="l84"></a>
+<h2 >4.3: The std::filesystem namespace</h2>
+Computers commonly store information that must survice reboots in their file
+systems. Traditionally, to manipulate the file system the <strong >C</strong> programming
+language offers functions performing the required system calls.  Such
+functions (like <strong >rename</strong>(2), <code >truncate</code>(2), <strong >opendir</strong>(2), and
+<strong >realpath</strong>(3)) are of course also available in <strong >C++</strong>, but their signatures
+and way of use are often less attractive as they usually expect <code >char const
+*</code> parameters and may use static buffers or memory allocation based on
+<strong >malloc</strong>(3) and <strong >free</strong>(3).
+<p>
+Since 2003 the <a name="an335"></a><a href="http://www.boost.org/doc/libs/1_65_1/libs/filesystem/doc/index.htm">Boost library</a>
+    offers <em >wrappers</em> around these functions,
+offering interfaces to those system calls that are more <strong >C++</strong>-like.
+<p>
+Currently <strong >C++</strong> directly supports these functions in the
+<code >std::filesystem</code><a name="an336"></a> namespace. These facilities can be used
+after including the <a name="an337"></a><code >&lt;filesystem&gt;</code> header file.
+<p>
+The <code >filesystem</code> namespace is extensive: it contains more than 10 different
+classes, and more than 30 free functions. To refer to the identifiers defined
+in the <code >std::filesystem</code> namespace their fully qualified names (e.g.,
+<code >std::filesystem::path</code> can be used). Alternatively, after specifying
+`<code >using namespace std::filesystem;</code>' the identifiers can be used without
+further qualifications. Namespace specifications like `<code >namespace fs =
+std::filesystem;</code>' are also encountered, allowing specifications like
+<code >fs::path</code>.
+<p>
+Functions in the <code >filesystem</code> namespace may fail. When functions cannot
+perform their assigned tasks they may throw exceptions (cf. chapter
+<a href="cplusplus10.html#EXCEPTIONS">10</a>) or they may assign values to <code >error_code</code> objects that
+are passed as arguments to those functions (see section <a href="cplusplus04.html#ERRORCODE">4.3.2</a> below).
+<p>
+<a name="FILECLOCK"></a><a name="l85"></a>
+<h3 >4.3.1: the '__file_clock' type</h3>
+    In section <a href="cplusplus04.html#CLOCKS">4.2.3</a> it was stated that various predefined clocks are
+available, of which the <code >system_clock</code> refers to the clock used by the
+computer itself. The <code >filesystem</code> namespace uses a different clock: the
+<code >std::filesystem::__file_clock</code>. Time points obtained using the
+<a name="an338"></a><code >__file_clock</code> differ from the time points obtained using the system clock:
+time points using the <code >__file_clock</code> are based on an epoch that (currently)
+lies well beyond the epoch Jan 1, 00:00:00 1970 that is used by the system
+clock: Fri Dec 31 23:59:59 2173. The two epochs can be positioned on a time
+scale with the present somewhere in between:
+    <pre>
+    &lt;------|-----------------------|-----------------------|-------&gt;
+      system_clock's --------&gt;  present &lt;--------    __file_clock's
+       epoch starts  positive            negative     epoch starts
+                      count               count
+</pre>
+<p>
+The <code >__file_clock</code> has its own peculiarities: the static member <code >now</code> is
+available, as are the the non-static members: additions and subtractions of
+durations and the member <code >time_since_epoch</code> can all be used. The other 
+members (<code >to_time_t, from_time_t, min</code> and <code >max</code>) aren't available.
+<p>
+Since <code >to_time_t</code> is not available for <code >__file_clock</code> how can we show the
+time or obtain the time's components of a <code >time_point&lt;__file_clock&gt;</code> object?
+<p>
+Computing the difference between the epochs we find
+6'437'663'999 seconds, which we can add to the obtained time since the
+<code >__file_clock's</code> epoch to obtain the time since the <code >system_clock's</code>
+epoch. If <code >timePt</code> holds the duration since the <code >__file_clock</code> epoch then
+        <pre>
+    6'437'663'999 + system_clock::to_time_t(
+                        time_point&lt;system_clock&gt;{ nanoseconds(timePt) })
+</pre>
+<p>
+equals the number of seconds since the <code >system_clock's</code> epoch.
+<p>
+The potential drawback of this procedure is that, as <code >__file_clock's</code>
+name starts with underscores, the begin of its epoch might change. By using
+the <code >now</code> members of both clocks this drawback is avoided:
+        <pre>
+    auto systemNow = system_clock::now().time_since_epoch();
+    auto fileNow = __file_clock::now().time_since_epoch();
+    time_t diff = (systemNow - fileNow) / 1'000'000'000;
+
+    time_t seconds = diff + system_clock::to_time_t(
+                        time_point&lt;system_clock&gt;{ nanoseconds(timePt) });
+</pre>
+<p>
+<a name="ERRORCODE"></a><a name="l86"></a>
+<h3 >4.3.2: The class 'error_code'</h3>
+    Objects of the class <a name="an339"></a><code >std::error_code</code> encapsulate <em >error values</em>, and
+associated <em >error categories</em> (cf. section <a href="cplusplus10.html#SYSTEMERROR">10.9</a>). Traditionally
+error values are available as values assigned to the global <a name="an340"></a> <code >int
+errno</code> variable. By convention, when <code >errno's</code> value equals zero there's no
+error. This convention was adopted by <code >error_code</code>.
+<p>
+Error codes can be defined for many conceptually different situations. Those
+situations are characterized by their own <em >error categories</em>. 
+<p>
+Error categories are used to associate <code >error_code</code> objects with the errors
+that are defined by those categories. Default available error categories may
+use values like <code >EADDRINUSE</code> (or the equivalent <code >enum class errc</code> value
+<code >address_in_use</code>) but new types of error categories, tailored to other
+contexts, can also be defined.  Defining error categories is covered near the
+end of the <strong >C++</strong> Annotations (section <a href="cplusplus23.html#ERRCAT">23.7.1</a>). At this point two
+<code >error_category</code> members are briefly introduced:
+    <ul>
+    <li><code >std::string message(int err)</code> returning a textual description of error
+        <code >err</code> (like <em >address already in use</em> when <code >err</code> equals
+        <code >address_in_use</code>).
+    <li><code >char const *name()</code> returning the name of the error category (like
+        <em >generic</em> for the generic category);
+    </ul>
+<p>
+Error category classes are singleton classes: only one object exists of each
+error category. In the context of the filesystem namespace the standard
+category <a name="an341"></a><code >system_category</code> is used, and a reference to the
+<a name="an342"></a><code >system_category</code> object is returned by the free function
+<code >std::system_category</code>, expecting no arguments. The public interface of the
+class <code >error_code</code> declares these construtors and members:
+<p>
+<strong >Constructors</strong>:
+    <ul>
+    <li><code >error_code() noexcept</code>:<br/>the object is initialized with error <em >value</em> 0 and the
+        <code >system_category</code> error category. Value 0 is not considered an
+        error;
+<p>
+<li> Copy- and move-constructors are available;
+<p>
+<li><code >error_code(int ec, error_category const &amp;cat) noexcept</code>:<br/>the object is initialized from  error value <code >ec</code>
+        (e.g., <code >errno</code>, set by a failing function), and a const reference to
+         the applicable error <em >category</em> (provided by, e.g.,
+         <a name="an343"></a> <code >std::system_category()</code> or
+         <a name="an344"></a> <code >std::generic_category()</code>). Here is an example
+         defining an <code >error_code</code> object:
+            <pre>
+    error_code ec{ 5, system_category() };
+</pre>
+<p>
+<li><code >error_code(ErrorCodeEnum value) noexcept</code>:<br/>this is a member template (cf. section <a href="cplusplus22.html#MEMTEMP">22.1.3</a>), using template
+        header <code >template &lt;class ErrorCodeEnum&gt;</code>. It initializes the object
+        with the return value of <code >make_error_code(value)</code> (see below). In
+        section <a href="cplusplus23.html#ERRCODEENUM">23.7</a> defining <code >ErrorCodeEnums</code> is
+        covered.  Note: <code >ErrorCodeEnum</code> as such does not exist. It
+        is a mere placeholder for existing <code >ErrorCodeEnum</code> enumerations; 
+    </ul>
+<p>
+<strong >Members</strong>:
+    <ul>
+    <li> The overloaded assignment operator and an assignment operator
+        accepting an <code >ErrorCodeEnum</code> are available;
+<p>
+<li><code >void assign(int val, error_category const &amp;cat)</code>:<br/>assigns new values to the object's error value and category. E.g,
+        <code >ec.assign(0, generic_category())</code>;
+<p>
+<li><code >error_category const &amp;category() const noexcept</code>:<br/>returns a reference to the object's error category;
+<p>
+<li><code >void clear() noexcept</code>:<br/>sets the <code >error_code's</code> value to 0 and its error category to
+        <code >system_category</code>;
+<p>
+<li><code >error_condition default_error_condition() const noexcept</code>:<br/>returns the current category's default error condition initialized
+        with the current object's error value and error category (see section
+        <a href="cplusplus10.html#ERRCOND">10.9.2</a> for details about the class <code >error_condition</code>);
+<p>
+<li><code >string message() const</code>:<br/>the message that is associated with the current object's error value
+        is returned (equivalent to <code >category().message(ec.value())</code>);
+<p>
+<li><code >explicit operator bool() const noexcept</code>:<br/>returns true if the object's error value is unequal 0 (i.e., it
+        represents and error)
+<p>
+<li><code >int value() const noexcept</code>:<br/>returns the object's error value.
+    </ul>
+<p>
+<strong >Free functions</strong>:
+    <ul>
+    <li> Two <code >error_code</code> objects can be compared for (in) equality and can
+        be ordered (using <code >operator&lt;</code>). 
+<p>
+Ordering <code >error_codes</code> associated with different error categories
+        has no meaning. But when the error categories are identical then they
+        are compared by their error code values (cf. this <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0824r1.html">SG14 discussion
+        summary</a>);
+<p>
+<li><a name="an345"></a><code >error_code make_error_code(errc value) noexcept</code>:<br/>returns an <code >error_code</code> object initialized with
+        <code >static_cast&lt;int&gt;(value)</code> and <code >generic_category()</code>. This function
+        converts an <code >enum class errc</code> value to an <code >error_code</code>. 
+<p>
+Other error related enums may also be defined with which tailored
+        <code >make_error_code</code> functions can be associated (cf. section
+        <a href="cplusplus23.html#ERRCODEENUM">23.7</a>;)
+<p>
+<li><code >std::ostream &amp;operator&lt;&lt;(std::ostream &amp; os, error_code const &amp;ec)</code>:<br/>executes the following statement:
+    <pre>
+return os &lt;&lt; ec.category().name() &lt;&lt; ':' &lt;&lt; ec.value();
+</pre>
+<p>
+</ul>
+<p>
+Several functions introduced below define an optional last <code >error_code &amp;ec</code>
+parameter. Those functions have <code >noexcept</code> specifications. If those
+functions cannot complete their tasks, then <code >ec</code> is set to the appropriate
+error code, calling <code >ec.clear()</code> if no error was encountered. If no <code >ec</code>
+argument is provided then those functions throw a <code >filesystem_error</code>
+exception if they cannot complete their tasks.
+<p>
+<a name="l87"></a>
+<h3 >4.3.3: Names of file system entries: path</h3>
+    Objects of the class <code >filesysten::path</code><a name="an346"></a> hold names of file
+system entries. The class <code >path</code> is a value class: a default
+constructor (empty path) as well as standard copy/move construction/assignment
+facilities are available. In addition, the following constructors can be used:
+    <ul>
+    <li><code >path(string &amp;&amp;tmp)</code>;
+    <li><code >path(Type const &amp;source)</code>:<br/> 
+       any acceptable type that provides the characters of the path (e.g.,
+        <code >source</code> is a NTBS);
+    <li><code >path(InputIter begin, InputIter end)</code>:<br/>
+       the characters from <code >begin</code> to <code >end</code> define the <code >path's</code> name.
+    </ul>
+    A thus constructed <code >path</code> doesn't have to refer to an existing file
+system entry.
+<p>
+Path constructors expect character sequences (including NTBSs) that may
+consist of various (all optional) elements:
+    <ul>
+    <li> a root-name, e.g., a disk-name (like <code >E:</code>) or device indicator
+        (like <code >//nfs</code>);
+    <li> a root-directory, present if it is the first character after
+        the (optional) root-name;
+    <li> filename characters (not containing directory separators). In
+        addition the `single dot filename' (<code >.</code>) represents the current
+        directory and the `double dot filename' (<code >..</code>) represents the
+        current directory's parent directory;
+    <li> directory separators (by default the forward slash). Multiple
+        consecutive separators are automatically merged into one separator.
+    </ul>
+<p>
+The constructors also define a last <code >format ftmp = auto_format</code>
+parameter, fir which in practice almost never an argument has to be provided
+(for its details see <a href="http://en.cppreference.com/w/cpp/experimental/fs/path">cppreference</a>.)
+<p>
+Many functions expect <code >path</code> arguments which can usually be created from
+NTBSs or <code >std::string</code> objects as <code >path</code> allows promotions (cf. section
+<a href="cplusplus11.html#EXPLICIT">11.4</a>). E.g., the filesystem function <code >absolute</code> expects a <code >const
+&amp;path</code> argument. It can be called like this: <code >absolute("tmp/filename")</code>.
+<p>
+<a name="l88"></a>
+<h4>4.3.3.1: Path modifiers</h4>
+            Objects of the class <code >path</code> can be handled in various ways:
+    <ul>
+    <li><code >path &amp;append(Type const &amp;arg)</code> or 
+                                <code >path &amp;operator/=(Type const &amp;arg)</code>:<br/>
+       the arguments that can be passed to the constructors can also be passed
+        to these members. The <code >arg</code> argument is separated from the path's
+        current content by a directory separator (unless the path is initially
+        empty as in <code >cout &lt;&lt; path{}.append("entry")</code>). See also <code >concat</code>,
+        below;
+<p>
+<li><code >void clear()</code>: the <code >path's</code> content is erased;
+<p>
+<li><code >int compare(Type const &amp;other)</code>:<br/>
+       returns the result of lexicographically comparing the current path's
+        content with <code >other</code>. <code >Other</code> can be a <code >path</code>, a string-type or
+        an NTBS;
+<p>
+<li><code >path &amp;concat(Type const &amp;arg)</code> or 
+                                <code >path &amp;operator+=(Type const &amp;arg)</code>:<br/>
+       similar to <code >append</code>, but <em >no</em> directory separator is used when
+        adding <code >arg</code> to the current <code >path</code>;
+<p>
+<li><code >path &amp;remove_filename()</code>:<br/>
+       removes the last component of the stored path. If only a root-directory
+        is stored, then the root directory is removed. Note that the last
+        directory separator is kept, unless it is the only path element;
+<p>
+<li><code >path &amp;replace_extension(path const &amp;replacement = path{} )</code>:<br/>
+       replaces the extension of the last component of the stored path
+        (including the extension's dot) with <code >replacement</code>. The extension is
+        removed if <code >replacement</code> is empty. If the <code >path</code> calling
+        <code >replace_extension</code> has no extension then <code >replacement</code> is added.
+        The replacement may optionally start with a dot. The path object's
+        extension receives only one dot;
+<p>
+<li><code >path &amp;replace_filename(path const &amp;replacement)</code>:<br/>
+       replaces the last component of the stored path with <code >replacement</code>,
+        which itself may contain multiple path elements.  If only a
+        root-directory is stored, then it is replaced by <code >replacement</code>. The
+        member's behavior is undefined if the current path object is empty;
+    </ul>
+<p>
+<a name="an347"></a> Accessors (no arguments, const members) return
+the path's content in various forms, depending on the used accessor member:
+<code >c_str</code> returns an NTBS, <code >string, wstring, u8string, u16string, u32string</code>
+(possibly prefixed by <code >generic_</code>, like <code >generic_string</code>) returns a
+string-type of object. Example:
+        <pre>
+    path ulb{ "/usr/local/bin" };
+    cout &lt;&lt; ulb.string() &lt;&lt; '\n';      // shows:   /usr/local/bin
+</pre>
+<p>
+<a name="an348"></a> Double quotes surround the displayed path name
+when inserting a <code >path</code> object into a stream. The double quotes are omitted
+when accessing the path's content as an NTBS or as a string, and also when
+assigning (or casting) <code >path</code> objects to strings.
+<p>
+<a name="an349"></a> When extracting <code >path</code> objects from streams
+the path name that is extracted may optionally be surrounded by double
+quotes. The extracted path contains one set of surrounding quotes.
+<p>
+<a name="an350"></a> All of the <code >path's</code> components are
+sequentially accessed using its <code >begin</code> and <code >end</code> iterators: each
+component is returned as a <code >path</code>. If available root names and root
+directories are returned as initial components, followed by the individual
+directories and finally filename components. The directory separators
+themselves are not returned when iterating over a <code >path's</code> components.
+<p>
+<a name="an351"></a>
+    <a name="an352"></a> Path components may also directly be obtained (if a
+component isn't present then an empty <code >path</code> component is returned). The
+following <em >decomposers</em> are available: <code >root_name, root_directory,
+root_path, relative_path, parent_path</code> ( returning the current path-content
+from which the last element has been removed), <code >filename, stem</code> (returning
+the filename without its dot-extension), and <code >extension</code>. Example:
+        <pre>
+    path ulb{ "/usr/local/bin" };
+    cout &lt;&lt; ulb.relative_path() &lt;&lt; '\n';    // shows:  "usr/local/bin"
+                                            // (note the double quotes)
+</pre>
+<p>
+When prefixed by <code >has_</code> the member returns a <code >bool</code> which is <code >true</code>
+if the component is present. Also available: <code >is_absolute, is_relative</code>.
+<p>
+<a name="l89"></a>
+<h4>4.3.3.2: Path operators and free functions</h4>
+        In addition to the member functions various (free) operators are available:
+<p>
+Path objects can be compared (using the <code >==, !=, &lt;, &lt;=, &gt;,</code> and <code >&gt;=</code>
+operators); the <code >/</code> operator returns the concatenated <code >lhs</code> and
+<code >rhs</code>, separated by a directory separator. 
+<p>
+Comparisons use lexicographical comparisons (as if by comparing the
+return values of their <code >string</code> members).
+<p>
+In addition free functions are available. Some of these copy files. Those
+functions accept an optional <a name="an353"></a>
+<code >std::filesystem::copy_options</code> argument. The <code >enum class copy_options</code>
+defines symbolic constants that can be used to fine-tune the behavior of these
+functions. The enumeration supports bitwise operators (the symbols' values are
+shown between parentheses). It defines these symbols:
+    <ul>
+    <li> When copying files:
+        <ul>
+        <li><code >none</code> (0): report an error (default behavior);
+        <li><code >skip_existing</code> (1): keep the existing file, without reporting an
+            error;
+        <li><code >overwrite_existing</code> (2): replace the existing file;
+        <li><code >update_existing</code> (4): replace the existing file only if it is
+            older than the file being copied;
+        </ul>
+    <li> When copying subdirectories:
+        <ul>
+        <li><code >none</code> (0): skip subdirectories (default behavior);
+        <li><code >recursive</code> (8): recursively copy subdirectories and their content;
+        </ul>
+    <li> When copying symlinks:
+        <ul>
+        <li><code >none</code> (0): follow symlinks (default behavior);
+        <li><code >copy_symlinks</code> (16): copy symlinks as symlinks, not as the files
+        they point to;
+        <li><code >skip_symlinks</code> (32): ignore symlinks;
+        </ul>
+    <li> To control <code >copy's</code> behavior itself:
+        <ul>
+        <li><code >none</code> (0): copy file content (default behavior);
+        <li><code >directories_only</code> (64): copy the directory structure, but do not
+            copy any non-directory files;
+        <li><code >create_symlinks</code> (128): instead of creating copies of files,
+            create symlinks pointing to the originals (the source path must be
+            an absolute path unless the destination path is in the current
+            directory);
+        <li><code >create_hard_links</code> (256): instead of creating copies of files,
+            create hardlinks that resolve to the same files as the originals.
+        </ul>
+    </ul>
+<p>
+The following functions expect <code >path</code> arguments:
+    <ul>
+    <li><a name="an354"></a><code >path absolute(path const &amp;src, path const&amp; base)</code>:<br/>a copy of <code >src</code> to which, unless already available in <code >src</code>,
+        <code >absolute(base)'s</code> root name and root directory are prepended.  It
+        can be called like this: <code >absolute("tmp/filename")</code>, returning the
+        (absolute) current working directory to which <code >absolute's</code> argument
+        is appended as a final element, separated by a directory separator.
+        Relative path indicators (like <code >../</code>) are kept. The returned
+        <code >path</code> merely is an absolute path. If relative path indicators
+        should be removed, then use the next function;
+<p>
+<li><a name="an355"></a><code >path canonical(path const &amp;src [, error_code &amp;ec])</code>:<br/>returns <code >src's</code> canonical path. The argument <code >src</code> must refer to
+        an existing directory entry. Example:
+        <pre>
+    path man{ "/usr/local/bin/../../share/man" };
+    cout &lt;&lt; canonical(man) &lt;&lt; '\n';    // shows:   "/usr/share/man"
+</pre>
+<p>
+<li><a name="an356"></a><code >void copy(path const &amp;src, path const &amp;dest [, copy_options
+        opts [, error_code &amp;ec]])</code>:<br/><code >src</code> must exist. Copies <code >src</code> to <code >dest</code> if the <code >cp</code> program
+        would also succeed.
+<p>
+If <code >src</code> is a directory, and <code >dest</code> does not exist, <code >dest</code> is
+        created. Directories are recursively copied if copy options
+        <code >recursive</code> or <code >none</code> were specified;
+<p>
+<li><a name="an357"></a><code >bool copy_file(path const &amp;src, path const &amp;dest [,
+        copy_options opts [, error_code &amp;ec]])</code>:<br/><code >src</code> must exist. Copies <code >src</code> to <code >dest</code> if the <code >cp</code> program
+        would also succeed. Symbolic links are followed. The value <code >true</code> is
+        returned if copying succeeded;
+<p>
+<li><a name="an358"></a><code >void copy_symlink(path const &amp;src, path const &amp;dest [,
+        error_code &amp;ec])</code>:<br/>creates the symlink <code >dest</code> as a copy of the symlink <code >src</code>;
+<p>
+<li><a name="an359"></a><code >bool create_directories(path const &amp;dest [,
+        error_code &amp;ec])</code>:<br/>creates each component of <code >dest</code>, unless already existing. The value
+        <code >true</code> is returned if <code >dest</code> was actually created. If <code >false</code> is
+        returned <code >ec</code> contains an error-code, which is zero (<code >ec.value()
+        == 0</code>) if <code >dest</code> already existed. See also 
+        <code >create_directory</code> below;
+<p>
+<li><a name="an360"></a><code >bool create_directory(path const &amp;dest [, path
+        const &amp;existing] [, error_code &amp;ec])</code>:<br/><code >dest's</code> parent directory must exist. This function creates
+        directory <code >dest</code> if it does not yet exist. The value <code >true</code> is
+        returned if <code >dest</code> was actually created. If <code >false</code> is returned
+        <code >ec</code> contains an error-code, which is zero (<code >ec.value() == 0</code>) if
+        <code >dest</code> already existed. If <code >existing</code> is specified, then <code >dest</code>
+        receives the same attributes as <code >existing</code>;
+<p>
+<li><a name="an361"></a><code >bool create_directory_symlink(path const
+        &amp;dir, path const &amp;link [, error_code &amp;ec])</code>:<br/>like <code >create_symlink</code>, but should be used to create a symbolic link
+        to a directory. See also <code >create_symlink</code> below;
+<p>
+<li><a name="an362"></a><code >bool create_hardlink(path const &amp;dest, path const
+        &amp;link [, error_code &amp;ec])</code>:<br/>creates a hard link from <code >link</code> to <code >dest</code>. <code >Dest</code> must exist;
+<p>
+<li><a name="an363"></a><code >bool create_symlink(path const &amp;dest, path const
+        &amp;link [, error_code &amp;ec])</code>:<br/>creates a symbolic (soft) link from <code >link</code> to <code >dest</code>; <code >dest</code>
+        does <em >not</em> have to exist;
+<p>
+<li><a name="an364"></a><code >path current_path([error_code &amp;ec])</code>, <code >void
+        current_path(path const &amp;toPath [, error_code &amp;ec])</code>:<br/>
+       the former function returns the current working directory (cwd),
+        the latter changes the cwd to <code >toPath</code>;
+<p>
+<li><a name="an365"></a><code >bool equivalent(path const &amp;path1, path const &amp;path2 [,
+        error_code &amp;ec])</code>:<br/><code >true</code> is returned if <code >path1</code> and <code >path2</code> refer to the same file
+        or directory, and have identical statuses. Both paths must exist;
+<p>
+<li><a name="an366"></a><code >bool exists(path const &amp;dest [, error_code &amp;ec])</code>,
+        <code >exists(file_status status)</code>:<br/>
+       <code >true</code> is returned if <code >dest</code> exists (actually: if
+        <code >status(dest[, ec])</code> (see below) returns <code >true</code>). Note: when
+        iterating over directories, the iterator usually provides the entries'
+        statuses. In those cases calling <code >exists(iterator-&gt;status())</code> is
+        more efficient than calling <code >exists(*iterator)</code>;
+<p>
+<li><a name="an367"></a><code >std::unintmax_t file_size(path const &amp;dest [, error_code
+        &amp;ec])</code>:<br/>returns the size in bytes of a regular file (or symlink destination);
+<p>
+<li><a name="an368"></a><code >std::uintmax_t hard_link_count(path const &amp;dest [,
+        error_code &amp;ec])</code>:<br/>returns the number of hard links associated with <code >dest</code>;
+<p>
+<li><a name="an369"></a><code >file_time_type last_write_time(path const &amp;dest [,
+        error_code &amp;ec])</code>, <code >void last_write_time(path const &amp;dest,
+        file_time_type newTime [, error_code &amp;ec])</code>:<br/>
+       the former function returns <code >dest's</code> last modification time;
+        the latter function changes <code >dest's</code> last modification time to
+        <code >newTime</code>. The return type <a name="an370"></a><code >file_time_type</code> is defined through a
+        <code >using</code> alias for <code >chrono::time_point</code> (cf. section
+        <a href="cplusplus04.html#TIMEPOINT">4.2.4</a>). The returned <code >time_point</code> is guaranteed to cover
+        all file time values that may be encountered in the current file
+        system. Referring to section <a href="cplusplus04.html#FILECLOCK">4.3.1</a>: here is how
+        the time returned by <code >last_write_time</code> can be represented using the
+        <code >system_clock's</code> epoch:
+            <pre>
+int main()
+{
+                // get `now' according to the system_clock and
+                // the __file_clock, compute their difference in
+                // nanoseconds and seconds:
+    auto systemNow = system_clock::now().time_since_epoch();
+    auto fileNow = __file_clock::now().time_since_epoch();
+    duration diffNano = systemNow - fileNow;
+    time_t diff = diffNano.count() / 1'000'000'000;
+
+    cout &lt;&lt; "system_clock now: "  &lt;&lt; systemNow.count() &lt;&lt; "\n"
+            "__file_clock now: "  &lt;&lt; fileNow.count()   &lt;&lt; "\n"
+            "difference (nano): " &lt;&lt; diffNano.count()  &lt;&lt; "\n"
+            "difference (secs): " &lt;&lt; diff &lt;&lt; '\n';
+
+    auto lwt = last_write_time("lastwritetime.cc").time_since_epoch();
+    time_t seconds = diff + system_clock::to_time_t(
+                            time_point&lt;system_clock&gt;{ nanoseconds(lwt) } );
+    cout &lt;&lt; "lastwritetime.cc's time: " &lt;&lt;
+                put_time(gmtime(&amp;seconds), "%c") &lt;&lt; '\n';
+
+    seconds =
+        system_clock::to_time_t(time_point&lt;system_clock&gt;{ diffNano });
+    cout &lt;&lt; "__file_clock's epoch time expressed using the system_clock:\n"
+            "       " &lt;&lt; put_time(gmtime(&amp;seconds), "%c") &lt;&lt; "\n"
+            "same, merely using the difference in `now' clock-seconds:\n"
+            "       " &lt;&lt; put_time(gmtime(&amp;diff), "%c") &lt;&lt; '\n';
+}
+</pre>
+<p>
+<li><a name="an371"></a><code >path read_symlink(path const &amp;src [, error_code &amp;ec])</code>:<br/><code >src</code> must refer to a symbolic link or an error is generated. The
+        link's target is returned;
+<p>
+<li><a name="an372"></a><code >bool remove(path const &amp;dest [, error_code &amp;ec])</code>,
+        <a name="an373"></a> <code >std::uintmax_t remove_all(path const &amp;dest [,
+        error_code &amp;ec])</code>:<br/>
+       <code >remove</code> removes the file, symlink, or empty directory
+        <code >dest</code>, returning <code >true</code> if <code >dest</code> could be removed;
+        <code >remove_all</code> removes <code >dest</code> if it's a file (or symlink); and
+        recursively removes directory <code >dest</code>, returning the number of
+        removed entries;
+<p>
+<li><a name="an374"></a><code >void rename(path const &amp;src, path const &amp;dest [, error_code
+        &amp;ec])</code>:<br/>renames <code >src</code> to <code >dest</code>, as if using the standard <strong >mv</strong>(1)
+        command (if <code >dest</code> exists it is overwritten);
+<p>
+<li><a name="an375"></a><code >void resize_file(path const &amp;src, std::uintmax_t size [,
+        error_code &amp;ec])</code>:<br/><code >src's</code> size is changed to <code >size</code> as if using the standard
+        <strong >truncate</strong>(1) command;
+<p>
+<li><a name="an376"></a><code >space_info space(path const &amp;src [, error_code &amp;ec])</code>:<br/>returns information about the file system in which <code >src</code> is
+        located;
+<p>
+<li><a name="an377"></a><code >path system_complete(path const &amp;src[, error_code&amp;
+        ec])</code>:<br/>returns the absolute path matching <code >src</code>, using <code >current_path</code> as
+        its base;
+<p>
+<li><a name="an378"></a><code >path temp_directory_path([error_code&amp; ec])</code>:<br/> returns the path to a directory that can be used for temporary
+        files. The directory is not created, but its name is commonly
+        available from the environment variables <a name="an379"></a><code >TMPDIR</code>, <code >TMP, TEMP</code>, or
+        <code >TEMPDIR</code>. Otherwise, <code >/tmp</code> is returned.
+    </ul>
+<p>
+<a name="l90"></a>
+<h3 >4.3.4: Handling directories: directory_entry</h3>
+    The file system is a recursive data structure. Its top-level entry is a
+directory (the root directory) containing plain directory entries (files,
+(soft) links, named sockets, etc.) and possibly also (sub)directory
+entries referring to nested directories which in turn may contiain plain-
+and (sub)directory entries.
+<p>
+In the <code >std::filesystem</code> namespace the elements of directories are objects
+of the class <a name="an380"></a><code >directory_entry</code>, containing names and statuses of the entries
+of that directory. 
+<p>
+The class <code >directory_entry</code> supports all standard constructors and
+assignment operators and in addition a constructor expecting a <code >path</code>:
+        <pre>
+    directory_entry(path const &amp;entry);
+</pre>
+<p>
+Objects of the class <code >directory_entry</code> can be constructed by name, without
+requiring that those objects refer to existing entries in the computer's
+file system. The assignment operator is also available, as is the
+(<code >ostream</code>) insertion operator, inserting the object's <code >path</code> into the
+stream. The extraction operator is not available.
+<p>
+`<code >directory_entry</code>' objects may be compared using the <code >==, !=, &lt;, &lt;=,
+&gt;,</code> and <code >&gt;=</code> operators. These operators are then applied to
+their <code >path</code> objects: <code >directory_entry("one") == directory_entry("one")</code>
+returns <code >true</code>. 
+<p>
+In addition to these operators the class <code >directory_entry</code> also has
+these member functions:
+    <ul>
+    <li><a name="an381"></a><code >void assign(path const &amp;dest)</code>:<br/>the current path is replaced by <code >dest</code> (its action is identical to
+        that of the overloaded assignment operator);
+<p>
+<li><a name="an382"></a><code >void replace_filename(path const &amp;dest)</code>:<br/>the last element of the current object's path is replaced by
+        <code >dest</code>. If that element is empty (like when the object's path ends
+        in a directory separator) then <code >dest</code> is appended to the current
+        object's path;
+<p>
+<li><a name="an383"></a><code >path const &amp;path() const</code>, <a name="an384"></a>
+        <code >operator path const &amp;() const</code>:<br/>
+       the current object's path name is returned;
+<p>
+<li><a name="an385"></a><code >file_system::file_status status([error_code &amp;ec])</code>:<br/>returns type and attributes of the directory entry referred to by the
+        current object. If the current object refers to a symlink, and the
+        symlink's type and status are required, then use <a name="an386"></a><code >symlink_status</code>
+        (see also section <a href="cplusplus04.html#FSSTATUS">4.3.5</a> below).
+    </ul>
+<p>
+<a name="l91"></a>
+<h4>4.3.4.1: Visiting directory entries: (recursive_)directory_iterator</h4>
+        The <code >filesystem</code> namespace has two classes simplifying directory
+processing: objects of the class <code >directory_iterator</code> are (input) iterators
+iterating over the entries of directories; and objects of the class
+<code >recursive_directory_iterator</code> are (input) iterators recursively visiting
+all entries of directories.
+<p>
+The classes <code >(recursive_)directory_iterator</code> provides default, copy, and
+move constructors. Objects of both classes may also be constructed from a
+<code >path</code> and an optional <code >error_code</code>. E.g.,
+        <pre>
+    directory_iterator(path const &amp;dest [, error_code &amp;ec]);
+</pre>
+<p>
+All members of standard input iterators (cf. section <a href="cplusplus18.html#ITERATORS">18.2</a>) are
+supported. These iterators point to <code >directory_entry</code> objects referring to
+entries in the computer's file system. E.g.,
+        <pre>
+    cout &lt;&lt; *directory_iterator{ "/home" } &lt;&lt; '\n'; // shows the first
+                                                        // entry under /home
+</pre>
+<p>
+End-iterators matching these objects are available through the default
+constructed objects of the two classes. In addition, range-based for loops can
+be used as shown by the next example:
+        <pre>
+    for (auto &amp;entry: directory_iterator("/var/log"))
+        cout &lt;&lt; entry &lt;&lt; '\n';
+</pre>
+<p>
+For-statements explicitly defining iterators can also be used:
+        <pre>
+    for (
+        auto iter = directory_iterator("/var/log"), 
+              end = directory_iterator{}; 
+                iter != end; 
+                    ++iter
+    )
+        cout &lt;&lt; entry &lt;&lt; '\n';
+</pre>
+<p>
+After constructing a <code >(recursive_)directory_iterator base{"/var/log"}</code>
+object it refers to the first element of its directory. Such iterators can
+also explicitly be defined: <code >auto &amp;iter = begin(base), auto iter =
+begin(base), auto &amp;iter = base</code> or <code >auto iter = base</code>. All these <code >iter</code>
+objects refer to <code >base's</code> data, and incrementing them also advances
+<code >base</code> to its next element:
+        <pre>
+    recursive_directory_iterator base{ "/var/log/" };
+    auto iter = base;
+                                // final two elements show identical paths,
+                                // different from the first element.
+    cout &lt;&lt; *iter &lt;&lt; ' ' &lt;&lt; *++iter &lt;&lt; ' ' &lt;&lt; *base &lt;&lt; '\n';
+</pre>
+    The functions <code >begin</code> and <code >end</code> that are used in the above examples
+are, like <code >(recursive_)directory_iterator</code>, available in the <code >filesystem</code>
+namespace.
+<p>
+The <code >recursive_directory_iterator</code> also accepts a <code >directory_options</code>
+argument (see below), by default specified as <code >directory_options::none</code>:
+        <pre>
+    recursive_directory_iterator(path const &amp;dest,
+                            directory_options options [, error_code &amp;ec]);
+</pre>
+<p>
+The <code >enum class directory_options</code><a name="an387"></a> defines values that
+are used to fine-tune the behavior of <code >recursive_directory_iterator</code>
+objects, supporting bitwise operators (the values of its symbols are shown
+between parentheses):
+    <ul>
+    <li><code >none</code> (0): directory symlinks are skipped, denied permission to enter
+        a subdirectory generates an error;
+    <li><code >follow_directory_symlink</code> (1): symlinks to subdirectories are
+        followed;
+    <li><code >skip_permission_denied</code> (2): directories that cannot be entered are
+        silently skipped. 
+    </ul>
+<p>
+The class <code >recursive_directory_iterator</code> also has these members:
+    <ul>
+    <li><a name="an388"></a><code >int depth() const</code>:<br/>returns the current iteration depth. The depth of the initial
+        directory, specified at construction-time, equals 0;
+<p>
+<li><a name="an389"></a><code >void disable_recursion_pending()</code>:<br/>when called before incrementing the iterator the next directory entry
+        is not recursively visited if it is a sub-directory. Then, after
+        incrementing the iterator recursion is again allowed. If a recursion
+        should end at a specific depth then this function must repeatedly be
+        called before calling the iterator's increment operator once
+        <code >depth()</code> returns that specific depth;
+<p>
+<li><a name="an390"></a><code >recursive_directory_iterator &amp;increment(error_code &amp;ec)</code>:<br/>acts identically to the iterator's increment operator. However, when
+        an error occurs <code >operator++</code> throws a <code >filesystem_error</code>
+        exception, while <code >increment</code> assigns the error to <code >ec</code>;
+<p>
+<li><a name="an391"></a><code >directory_options options() const</code>:<br/>returns the option(s) specified at construction-time;
+<p>
+<li><a name="an392"></a><code >void pop()</code>:<br/>ends processing the current directory, and continues at the next
+        entry in the current directory's parent. When (in a for-statement, see
+        the example below) called from the initial
+        directory that directory's processing ends;
+<p>
+<li><a name="an393"></a><code >bool recursion_pending() const</code>:<br/><code >true</code> is returned if recursive processing of sub-directories of the
+        currently processed directory is allowed. If so, and the directory
+        entry the iterator points at is a sub-directory then processing
+        continues at that sub-directory at the iterator's next increment;
+    </ul>
+<p>
+Here is a little program displaying all directory elements of a directory and
+of all its immediate sub-directories.
+        <pre>
+    int main()
+    {
+        recursive_directory_iterator base{ "/var/log" };
+
+        for (auto entry = base, end = end(base); entry != end; ++entry)
+        {
+            cout &lt;&lt; entry.depth() &lt;&lt; ": " &lt;&lt; *entry &lt;&lt; '\n';
+            if (entry.depth() == 1)
+                entry.disable_recursion_pending();
+        }
+    }
+</pre>
+<p>
+The above program handles entries as they come. If other strategies are needed
+they have to be implemented. E.g., a breadth-first strategy first visits all
+the non-directory entries and then visits the sub-directories. In the next
+example this is realized by processing each of the directories stored in
+<code >level</code> (initially it merely contains the starting directory). `Processing a
+directory' means that its non-directory entries are directly processed while
+the names of its sub-directories are stored in <code >next</code>. Once all entries in
+<code >level</code> have been processed the names of the next level sub-directories are
+available in <code >next</code> and by assigning <code >next</code> to <code >level</code> all directories
+at the next level are processed. When reaching the most deeply nested
+sub-directories <code >next</code> remains empty and the <code >while</code> statement ends:
+    <pre>
+    void breadth(path const &amp;dir)           // starting dir.
+    {
+        vector&lt;path&gt; level{ dir };          // currently processed level
+    
+        while (not level.empty())           // process all its dirs.
+        {
+            vector&lt;path&gt; next;              // dirs of the next level
+    
+            for (auto const &amp;dir: level)    // visit all dirs at this level
+            {
+                cout &lt;&lt; "At " &lt;&lt; dir &lt;&lt; '\n';
+                                            // at each dir: visit all entries
+                for (auto const &amp;entry: directory_iterator{ dir })
+                {
+                    if (entry.is_directory())   // store all dirs at the current
+                        next.push_back(entry);  //  level
+                    else                        // or process its non-dir entry
+                        cout &lt;&lt; "   entry: " &lt;&lt; entry &lt;&lt; '\n';
+                }
+            }
+    
+            level = next;                   // continue at the next level,
+        }                                   // which eventually won't exist
+    }
+</pre>
+<p>
+<a name="FSSTATUS"></a><a name="l92"></a>
+<h3 >4.3.5: Types (file_type) and permissions (perms) of file
+            system elements: file_status</h3>
+    File system entries (represented by <code >path</code> objects), have several
+attributes: permissions (e.g., the owner may modifiy an entry, others may
+only read entries), and types (like plain files, directories, and soft-links).
+<p>
+Types and permissions of file system entries are available through objects of
+the class <a name="an394"></a><code >file_status</code>. The class <code >file_status</code> is a value-class
+supporting copy- and move- constructors and assignment operators.
+<p>
+The constructor 
+        <pre>
+    explicit file_status(file_type type = file_type::none,
+                         perms permissions = perms::unknown)
+</pre>
+<p>
+creates the file status for a specific type of file system entry having a
+specific set of permissions. It also acts as default constructor.
+<p>
+The constructor's first parameter is an enumeration specifying the type of
+a file system entry represented by a <code >path</code> object:
+    <ul>
+    <li><code >not_found = -1</code> indicates that a file system entry whose status was
+        requested was not found (this is not considered an error);
+    <li><code >none</code> indicates either that the file status has not yet been
+        evaluated, or that an error occurred when an entry's status was
+        evaluated;
+    <li><code >regular</code>:   the entry is a regular file;
+    <li><code >directory</code>: the entry is a directory;
+    <li><code >symlink</code>:   the entry is a symbolic link;
+    <li><code >block</code>:     the entry is a block device;
+    <li><code >character</code>: the entry is a character device;
+    <li><code >fifo</code>:      the entry is  a named pipe;
+    <li><code >socket</code>:    the entry is a socket file;
+    <li><code >unknown</code>:   the entry is an unknown file type
+    </ul>
+<p>
+The constructor's second parameter defines the <code >enum class perms</code>
+specifying the access permissions of file system entries. The enumeration's
+symbols were selected so that their meanings should be more descriptive than
+the constants defined in the <a name="an395"></a><code >&lt;sys/stat.h&gt;</code> header file, but other than that
+they have identical values. All bitwise operators can be used by values
+of the <code >enum class perms</code>. Here is an overview of the symbols defined by the
+<code >enum class perms</code>:
+    <div style="text-align: center"><table class="XXfc"  >
+    <tr><td colspan=4><hr/></td></tr>
+<tr >
+<td colspan="4", class="XXtc"><strong >4</strong></td></tr>
+<tr >
+<td > Symbol</td><td > Value</td><td > sys/stat.h</td>    <td class="XXvt "; ><div class="XXtl">Meaning</div></td>
+</tr>
+    <tr><td colspan=4><hr/></td></tr>
+<tr >
+    <td class="XXvt "; ><div class="XXtl">none</div></td>
+    <td class="XXvt "; ><div class="XXtr">0000</div></td>
+    <td class="XXvt "; ><div class="XXtl"></div></td>
+    <td class="XXvt "; ><div class="XXtl">No permission bits were set</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">owner_read</div></td>
+    <td class="XXvt "; ><div class="XXtr">0400</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IRUSR</div></td>
+    <td class="XXvt "; ><div class="XXtl">File owner has read permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">owner_write</div></td>
+    <td class="XXvt "; ><div class="XXtr">0200</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IWUSR</div></td>
+    <td class="XXvt "; ><div class="XXtl">File owner has write permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">owner_exec</div></td>
+    <td class="XXvt "; ><div class="XXtr">0100</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IXUSR</div></td>
+    <td class="XXvt "; ><div class="XXtl">File owner has execute/search
+                         permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">owner_all</div></td>
+    <td class="XXvt "; ><div class="XXtr">0700</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IRWXU</div></td>
+    <td class="XXvt "; ><div class="XXtl">File owner has read, write, and
+                         execute/search permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">group_read</div></td>
+    <td class="XXvt "; ><div class="XXtr">0040</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IRGRP</div></td>
+    <td class="XXvt "; ><div class="XXtl">The file's group has read permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">group_write</div></td>
+    <td class="XXvt "; ><div class="XXtr">0020</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IWGRP</div></td>
+    <td class="XXvt "; ><div class="XXtl">The file's group has write permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">group_exec</div></td>
+    <td class="XXvt "; ><div class="XXtr">0010</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IXGRP</div></td>
+    <td class="XXvt "; ><div class="XXtl">The file's group has execute/search
+                         permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">group_all</div></td>
+    <td class="XXvt "; ><div class="XXtr">0070</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IRWXG</div></td>
+    <td class="XXvt "; ><div class="XXtl">The file's group has read, write, and 
+                         execute/search permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">others_read</div></td>
+    <td class="XXvt "; ><div class="XXtr">0004</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IROTH</div></td>
+    <td class="XXvt "; ><div class="XXtl">Other users have read permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">others_write</div></td>
+    <td class="XXvt "; ><div class="XXtr">0002</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IWOTH</div></td>
+    <td class="XXvt "; ><div class="XXtl">Other users have write permission</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">others_exec</div></td>
+    <td class="XXvt "; ><div class="XXtr">0001</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IXOTH</div></td>
+    <td class="XXvt "; ><div class="XXtl">Other users have execute/search
+                         permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">others_all</div></td>
+    <td class="XXvt "; ><div class="XXtr">0007</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_IRWXO</div></td>
+    <td class="XXvt "; ><div class="XXtl">Other users have read, write, and
+                         execute/search permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">all</div></td>
+    <td class="XXvt "; ><div class="XXtr">0777</div></td>
+    <td class="XXvt "; ><div class="XXtl"></div></td>
+    <td class="XXvt "; ><div class="XXtl">All users have read, write, and execute/search
+                         permissions</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">set_uid</div></td>
+    <td class="XXvt "; ><div class="XXtr">04000</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_ISUID</div></td>
+    <td class="XXvt "; ><div class="XXtl">Set user ID to file owner user ID on
+                         execution</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">set_gid</div></td>
+    <td class="XXvt "; ><div class="XXtr">02000</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_ISGID</div></td>
+    <td class="XXvt "; ><div class="XXtl">Set group ID to file's user group ID on
+                         execution</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">sticky_bit</div></td>
+    <td class="XXvt "; ><div class="XXtr">01000</div></td>
+    <td class="XXvt "; ><div class="XXtl">S_ISVTX</div></td>
+    <td class="XXvt "; ><div class="XXtl">POSIX XSI specifies that when set on a
+                         directory<br>
+                         only file owners may delete files even if
+                         the directory is writeable by 
+                         others<br>
+                         (used, e.g., with <code >/tmp</code>)</div></td>
+</tr>
+
+    <tr >
+    <td class="XXvt "; ><div class="XXtl">mask</div></td>
+    <td class="XXvt "; ><div class="XXtr">07777</div></td>
+    <td class="XXvt "; ><div class="XXtl"></div></td>
+    <td class="XXvt "; ><div class="XXtl">All valid permission bits.</div></td>
+</tr>
+
+        <tr><td colspan=4><hr/></td></tr>
+</table>
+</div>
+<p>
+The class <code >file_status</code> provides these members:
+    <ul>
+    <li><a name="an396"></a><code >perms permissions() const</code> and <code >void permissions(perms
+        newPerms [, perm_options opts] [, error_code &amp;ec])</code>:<br/>
+       the former member returns the permissions of the file system entry
+        represented by the <code >file_status</code> object, the latter can be used to
+        modify those permissions. The <a name="an397"></a><code >enum class
+        perm_options</code> has these values:
+       <ul>
+        <li><code >replace</code>: current options are replaced by <code >newPerms</code>;
+        <li><code >add</code>: <code >newPerms</code> are added to the current permissions;
+        <li><code >remove</code>: <code >newPerms</code> are removed from the current permissions;
+        <li><code >nofollow</code>: when <code >path</code> refers to a symbolic link the permissions
+            of the symbolic link instead of those of the file system entry the
+            link refers to are updated.
+        </ul>
+<p>
+<li><a name="an398"></a><code >file_type type() const</code> and <code >void type(file_type type)</code>:<br/>
+       the former member returns the type  of the file system entry
+        represented by the <code >file_status</code> object, the latter can be
+        used to set the type.
+    </ul>
+<p>
+<a name="l93"></a>
+<h4>4.3.5.1: Obtaining the status of file system entries</h4>
+            The <code >filesystem</code> functions <code >status</code> and <code >symlink_status</code> 
+retrieve or change statuses of file system entries. These
+functions may be called with a final (optional) <code >error_code</code>
+argument which is assigned an appropriate error code if they cannot perform
+their tasks. If the argument is omitted the members throw exceptions if they
+cannot perform their tasks:
+    <ul>
+    <li><a name="an399"></a><code >file_status status(path const &amp;dest [, error_code &amp;ec])</code>:<br/>returns type and attributes of <code >dest</code>;
+<p>
+<li><a name="an400"></a><code >file_status symlink_status(path const &amp;dest [,
+        error_code &amp;ec])</code>:<br/>when calling <code >status</code> of a <code >path</code> object that
+        represents a symbolic link the status of the entry the link refers to
+        is obtained. To obtain the status information of the symbolic link
+        itself this member should be used;
+<p>
+<li><a name="an401"></a><code >bool status_known(file_status const &amp;status)</code>:<br/>returns <code >true</code> if <code >status</code> refers to a determined status
+        (<code >status</code> itself may indicate that the entity referred to by
+        <code >status</code> does not exist). One way of receiving <code >false</code> is by
+        passing it a default status object: <code >status_known(file_status{})</code>;
+    </ul>
+<p>
+Once a <code >file_status</code> object is obtained the file type of the entry whose
+status it represents can be interrogated using these functions (defined in the
+<code >filesystem</code> namespace, where <code >WHATEVER</code> is the requested 
+specification):
+        <pre>
+    bool is_WHATEVER(file_status status)
+    bool is_WHATEVER(path const path &amp;entry [, error_code &amp;ec])
+</pre>
+<p>
+These functions return <code >true</code> if <code >status</code> or <code >status</code> matches the
+requested type. Here are the available functions:
+    <ul>
+    <li><a name="an402"></a><code >is_block_file</code>: the path refers to a block device;
+    <li><a name="an403"></a><code >is_character_file</code>: the path refers to a character device;
+    <li><a name="an404"></a><code >is_directory</code>: the path refers to a directory;
+    <li><a name="an405"></a><code >is_empty</code>: the path refers to an empty file or directory;
+    <li><a name="an406"></a><code >is_fifo</code>: the path refers to a named pipe;
+    <li><a name="an407"></a><code >is_other</code>: the path does not refer to a directory, regular file or
+        symlink;
+    <li><a name="an408"></a><code >is_regular_file</code>: the path refers to a regular file;
+    <li><a name="an409"></a><code >is_socket</code>: the path refers to a named socket;
+    <li><a name="an410"></a><code >is_symlink</code>: the path refers to a symbolic link;
+    </ul>
+<p>
+Alternatively, the <code >file_status::type()</code> member can be used in, e.g., a
+<code >switch</code> to select an entry matching its <code >file_type</code> return value (see the
+previous section (<a href="cplusplus04.html#FSSTATUS">4.3.5</a>) for a description of the symbols defined by
+the <code >file_type</code> enum).
+<p>
+Here is a little program showing how file statuses can be obtained and
+shown (for the <em >map</em> see section <a href="cplusplus12.html#MAP">12.4.7</a>):
+    <pre>
+    namespace
+    {
+        std::unordered_map&lt;file_type, char const *&gt; statusMap =
+        {
+            { file_type::not_found, "an unknown file" },
+            { file_type::none,      "not yet or erroneously evaluated "
+                                                                "file type" },
+            { file_type::regular,   "a regular file" },
+            { file_type::directory, "a directory" },
+            { file_type::symlink,   "a symbolic link" },
+            { file_type::block,     "a block device" },
+            { file_type::character, "a character device" },
+            { file_type::fifo,      "a named pipe" },
+            { file_type::socket,    "a socket file" },
+            { file_type::unknown,   "an unknown file type" }
+        };
+    }
+    
+    int main()
+    {
+        cout &lt;&lt; oct;
+    
+        string line;
+        while (true)
+        {
+            cout &lt;&lt; "enter the name of a file system entry: ";
+            if (not getline(cin, line) or line.empty())
+                break;
+    
+            path entry{ line };
+    
+            error_code ec;
+            file_status stat = status(entry, ec);
+    
+            if (not status_known(stat))
+            {
+                cout &lt;&lt; "status of " &lt;&lt; entry &lt;&lt; " is unknown. "
+                                                "Ec = " &lt;&lt; ec &lt;&lt; '\n';
+                continue;
+            }
+    
+            cout &lt;&lt; "status of " &lt;&lt; entry &lt;&lt; ": type = " &lt;&lt;
+                     statusMap[stat.type()] &lt;&lt;
+                     ", permissions: " &lt;&lt;
+                        static_cast&lt;size_t&gt;(stat.permissions()) &lt;&lt; '\n';
+        }
+    }
+</pre>
+<p>
+<a name="l94"></a>
+<h3 >4.3.6: Information about the space of file systems: space_info</h3>
+    Every existing <code >path</code> lives in a file system, Sizes of file systems
+typically are quite large, but there is a limit to their sizes.
+<p>
+The size of file systems, the number of bytes that is currently being used
+and the remaining number of bytes is made available by the function 
+    <a name="an411"></a><a name="an412"></a> <code >space(path const &amp;entry [,
+error_code &amp;ec])</code>, returning the information about the file system containing
+<code >entry</code> in a POD <code >struct space_info</code>.
+<p>
+If the <code >error_code</code> argument is provided then it is cleared if no error
+occurs, and set to the operating system's error code if an error has
+occurred. If an error occurs and the <code >error_code</code> argument was not provided
+then a <code >filesystem_error</code> exception is thrown, receiving <code >path</code> as its
+first argument and the operating system's error code as its <code >error_code</code>
+argument.  
+<p>
+The returned <code >space_info</code> has three fields:
+        <pre>
+    uintmax_t capacity;     // total size in bytes
+    uintmax_t free;         // number of free bytes on the file system
+    uintmax_t available;    // free bytes for a non-privileged process
+</pre>
+<p>
+If a field cannot be determined it is set to -1 (i.e., the max. value of
+the type <code >uintmax_t</code>). 
+<p>
+The function can be used this way:
+        <pre>
+    int main()
+    {
+        path tmp{ "/tmp" };
+    
+        auto pod = space(tmp);
+    
+        cout &lt;&lt; "The filesystem containing /tmp has a capacity of " &lt;&lt;
+                                                pod.capacity &lt;&lt; " bytes,\n"
+            "i.e., " &lt;&lt; pod.capacity / (1024 * 1024) &lt;&lt; " MB.\n"
+            "# free bytes: " &lt;&lt; pod.free &lt;&lt; "\n"
+            "# available:  " &lt;&lt; pod.available &lt;&lt; "\n"
+            "free + available:  " &lt;&lt; pod.free + pod.available &lt;&lt; '\n';
+    }
+</pre>
+<p>
+<a name="l95"></a>
+<h3 >4.3.7: File system exceptions: filesystem_error</h3>
+    The <code >std::filesystem</code> namespace offers its own exception type
+<a name="an413"></a><code >filesystem_error</code> (see also chapter <a href="cplusplus10.html#EXCEPTIONS">10</a>). Its constructor has
+the following signature (the bracketed parameters are optional):
+        <pre>
+    filesystem_error(string const &amp;what, 
+                    [path const &amp;path1, [path const &amp;path2,]] 
+                    error_code ec);
+</pre>
+<p>
+As <code >filesystem</code> facilities are closely related to standard system
+functions, <code >errc</code> error code enumeration values can be used to obtain
+<code >error_codes</code> to pass to <code >filesystem_error</code>, as illustrated by the
+following program:
+    <pre>
+    int main()
+    try
+    {
+        try
+        {
+            throw filesystem_error{ "exception encountered", "p1", "p2",
+                                        make_error_code(errc::address_in_use) };
+        }
+        catch (filesystem_error const &amp;fse)
+        {
+            cerr &lt;&lt; "what:  " &lt;&lt; fse.what() &lt;&lt; "\n"
+                    "path1: " &lt;&lt; fse.path1() &lt;&lt; "\n"
+                    "path2: " &lt;&lt; fse.path2() &lt;&lt; "\n"
+                    "code:  " &lt;&lt; fse.code() &lt;&lt; '\n';
+    
+            throw;
+        }
+    }
+    catch (exception const &amp;ec)
+    {
+        cerr &lt;&lt; "\n"
+                "plain exception's what: " &lt;&lt; ec.what() &lt;&lt; "\n\n";
+    }
+</pre>
+<p>
+
+<hr>
+<ul>
+    <li> <a href="cplusplus.html">Table of Contents</a>
+    <li> <a href="cplusplus03.html">Previous Chapter</a>
+    <li> <a href="cplusplus05.html">Next Chapter</a>
+</ul>
+<hr>
+</body>
+</html>

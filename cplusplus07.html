@@ -1,0 +1,2969 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<title> C++ Annotations Version 11.5.0 </title>
+<link rel="stylesheet" type="text/css" href="cplusplus.css"><style type="text/css">
+    figure {text-align: center;}
+    img {vertical-align: center;}
+    .XXfc {margin-left:auto;margin-right:auto;}
+    .XXtc {text-align: center;}
+    .XXtl {text-align: left;}
+    .XXtr {text-align: right;}
+    .XXvt {vertical-align: top;}
+    .XXvb {vertical-align: bottom;}
+</style>
+<link rel="stylesheet" type="text/css" href="cplusplus.css"></head>
+<body >
+<hr>
+<ul>
+    <li> <a href="cplusplus.html">Table of Contents</a>
+    <li> <a href="cplusplus06.html">Previous Chapter</a>
+    <li> <a href="cplusplus08.html">Next Chapter</a>
+</ul>
+<hr>
+<a name="Classes"></a><a name="l133"></a>
+<h1 >Chapter 7: Classes</h1>
+The <strong >C</strong> programming language offers two methods for structuring data of
+different types. The <strong >C</strong> <code >struct</code> holds data members of various types, and
+the <strong >C</strong> <code >union</code> also defines data members of various types. However, a
+union's data members all occupy the same location in memory and the programmer
+may decide on which one to use.
+<p>
+In this chapter classes are introduced. A <code >class</code> is a kind of <code >struct</code>,
+but its content is by default inaccessible to the outside world, whereas the
+content of a <strong >C++</strong> <code >struct</code> is by default accessible to the outside
+world. In <strong >C++</strong> <code >struct</code>s find little use: they are mainly used to
+aggregate data within the context of classes or to define elaborate return
+values. Often a <strong >C++</strong> <code >struct</code> merely contains <em >plain old data</em> (POD,
+cf. section <a href="cplusplus09.html#POD">9.10</a>). In <strong >C++</strong> the <code >class</code> is the main data structuring
+device, by default enforcing two core concepts of current-day software
+engineering: <em >data hiding</em> and <em >encapsulation</em> (cf. sections <a href="cplusplus03.html#HIDING">3.2.1</a>
+and <a href="cplusplus07.html#APPLICATION">7.1.1</a>).
+<p>
+The <code >union</code> is another data structuring device the language offers. The
+traditional <strong >C</strong> union is still available, but <strong >C++</strong> also offers
+<em >unrestricted unions</em>. Unrestricted unions are unions whose data fields may
+be of class types. The <strong >C++</strong> Annotations covers these unrestricted unions in
+section <a href="cplusplus09.html#UNIONS">9.9</a>, after having introduced several other new concepts of
+<strong >C++</strong>,
+<p>
+<strong >C++</strong> extends the <strong >C</strong> <code >struct</code> and <code >union</code> concepts by allowing the
+definition of <em >member</em>
+        <a name="an817"></a>
+    functions (introduced in this chapter) within these data types.  Member
+functions are functions that can only be used with objects of these data types
+or within the scope of these data types. Some of these member functions are
+special in that they are always, usually automatically, called when an object
+starts its life (the so-called <em >constructor</em>) or ends its life (the
+so-called <em >destructor</em>). These and other types of member functions, as well
+as the design and construction of, and philosophy behind, classes are
+introduced in this chapter.
+<p>
+We step-by-step construct a class <code >Person</code>, which could be used in a
+database application to store a person's name, address and phone number.
+<p>
+<a name="PERSON"></a> Let's start by creating a <code >class Person</code> right away. From the
+onset, it is important to make the distinction between the class
+<a name="an818"></a><em >interface</em> and its <a name="an819"></a><em >implementation</em>. A class may loosely be defined as
+`a set of data and all the functions operating on those data'. This definition
+is later refined but for now it is sufficient to get us started.
+<p>
+A class interface is a definition, defining the organization of objects of
+that class. Normally a definition results in memory reservation. E.g., when
+defining <code >int variable</code> the compiler ensures that some memory is reserved in
+the final program storing <code >variable</code>'s values.  Although it is a definition
+no memory is set aside by the compiler once it has processed the class
+definition. But a class definition follows the <a name="an820"></a><em >one definition rule</em>: in
+<strong >C++</strong> entities may be defined only once. As a <em >class definition</em> does not
+imply that memory is being reserved the term <em >class interface</em> is preferred
+instead.
+<p>
+Class interfaces are normally contained in a class <em >header file</em>, e.g.,
+<code >person.h</code>. We'll start our <code >class Person</code> interface here (cf section
+<a href="cplusplus07.html#ConstFunctions">7.7</a> for an explanation of the <code >const</code> keywords behind some
+of the class's member functions):
+        <pre>
+    #include &lt;string&gt;
+
+    class Person
+    {
+        std::string d_name;         // name of person
+        std::string d_address;      // address field
+        std::string d_phone;        // telephone number
+        size_t      d_mass;         // the mass in kg.
+
+        public:                     // member functions
+            void setName(std::string const &amp;name);
+            void setAddress(std::string const &amp;address);
+            void setPhone(std::string const &amp;phone);
+            void setMass(size_t mass);
+
+            std::string const &amp;name()    const;
+            std::string const &amp;address() const;
+            std::string const &amp;phone()   const;
+            size_t mass()                const;
+    };
+</pre>
+ The member functions that are <em >declared</em> in the interface must still be
+implemented. The implementation of these members is properly called their
+definition.
+<p>
+In addition to member <em >functions</em> classes also commonly define the <em >data</em>
+that are manipulated by those member functions. These data are called the
+<a name="an821"></a><em >data members</em>. In <code >Person</code> they are <code >d_name, d_address,
+d_phone</code> and <code >d_mass</code>. Data members should be given private 
+    <a name="an822"></a>access rights. Since the class uses private access rights by default
+they are usually simply listed at the top of the class interface.
+<p>
+All communication between the outer world and the class data is routed through
+the class's member functions. Data members may receive new values (e.g., using
+<code >setName</code>) or they may be retrieved for inspection (e.g., using
+<code >name</code>). Functions merely returning values stored inside the object, not
+allowing the caller to modify these internally stored values, are called
+ <a name="an823"></a><em >accessors</em>.
+<p>
+Syntactically there is only a marginal difference between a class and a
+struct. Classes by default define <em >private</em> members, structs define
+<em >public</em> members. Conceptually, though, there are differences.  In <strong >C++</strong>
+structs are used in the way they are used in <strong >C</strong>: to aggregate data, which
+are all freely accessible. Classes, on the other hand, hide their data from
+access by the outside world (which is aptly called <a name="an824"></a><em >data hiding</em>)
+and offer member functions to define the communication between the outer world
+and the class's data members.
+<p>
+Following <em >Lakos</em> (Lakos, J., 2001)
+    <a name="an825"></a> <strong >Large-Scale C++ Software Design</strong> (Addison-Wesley) I
+suggest the following setup of class interfaces:
+    <ul>
+    <li> All data members have <em >private access rights</em>, and are
+placed at the top of the interface.
+    <li> All data members start with <code >d_</code>, followed by a name suggesting
+their meaning (in chapter <a href="cplusplus08.html#StaticDataFun">8</a> we'll also
+encounter data members starting with <code >s_</code>).
+    <li> Non-private data members <em >do</em> exist, but one should be hesitant to
+define non-private access rights for data members (see also chapter
+<a href="cplusplus13.html#INHERITANCE">13</a>).
+    <li> Two broad categories of member functions are
+    <a name="an826"></a><em >manipulators</em> and <em >accessors</em>. Manipulators allow
+the users of objects to modify the internal data of the objects. By
+convention, manipulators start with <code >set</code>. E.g., <code >setName</code>.
+    <li> With <em >accessors</em>, a <code >get</code>-prefix is still frequently encountered,
+e.g., <code >getName</code>. However, following the conventions promoted by the <a name="an827"></a><strong >Qt</strong>
+(see <a name="an828"></a><code >http://www.trolltech.com</code>)
+ <a name="an829"></a><em >Graphical User Interface Toolkit</em>, the <code >get</code>-prefix is now
+deprecated. So, rather than defining the member <code >getAddress</code>, it should
+simply be named <code >address</code>.
+    <li> Normally (exceptions exist) the public member functions of a class
+are listed first, immediately following the class's data members. They are the
+important elements of the interface as they define the features the class is
+offering to its users. It's a matter of convention to list them high up in the
+interface.  The keyword <code >private</code> is needed beyond the public members to
+switch back from public members to private access rights which
+nicely separates the members that may be used `by the general public' from the
+class's own support members.
+    </ul>
+    Style conventions usually take a long time to develop. There is nothing
+obligatory about them, though. I suggest that readers who have compelling
+reasons <em >not</em> to follow the above style conventions use their own. All
+others are strongly advised to adopt the above style conventions.
+<p>
+Finally, referring back to section <a href="cplusplus03.html#INTRONAME">3.1.2</a> that
+        <pre>
+    using namespace std;
+</pre>
+<p>
+must be used in most (if not all) examples of source code. As
+explained in sections <a href="cplusplus07.html#CLASSHEADER">7.11</a> and <a href="cplusplus07.html#NAMESPACEHDR">7.11.1</a> the <code >using</code>
+directive should follow the preprocessor directive(s) including the header
+files, using a setup like the following:
+        <pre>
+    #include &lt;iostream&gt;
+    #include "person.h"
+
+    using namespace std;
+
+    int main()
+    {
+        ...
+    }
+</pre>
+<p>
+<a name="l134"></a>
+<h2 >7.1: The constructor</h2>
+<strong >C++</strong> classes usually contain two special categories of member functions
+which are essential to the proper working of classes. These categories are the
+constructors and the <a name="an830"></a>destructor. The <em >destructor</em>'s primary task is to
+return memory allocated by an object to the common pool when an object goes
+`out of scope'.  Allocation of memory is discussed in chapter <a href="cplusplus09.html#MEMORY">9</a>, and
+an in-depth coverage of destructors is therefore postponed until we reach that
+chapter.  In the current chapter the emphasis is on the class's internal
+organization and on its constructors.
+<p>
+Constructors are recognized by their names which are equal to their class
+names.  Constructors do not specify return values, not even <code >void</code>.  E.g.,
+the class <code >Person</code> may define a constructor <code >Person::Person()</code>. The
+<strong >C++</strong> run-time system ensures that the constructor of a class is called when
+a variable of the class is defined. It is possible to define a class lacking
+any constructor. In that case the compiler defines a
+ <a name="an831"></a> default constructor that is called when an object of
+that class is defined. What actually happens in that case depends on the data
+members that are defined by that class (cf. section <a href="cplusplus07.html#MemberInitializers">7.3.1</a>).
+<p>
+Objects may be defined locally or globally. However, in <strong >C++</strong> most objects
+are defined locally. Globally defined objects are hardly ever required and are
+somewhat deprecated.
+<p>
+When a function defines a local object, that object's constructor is called
+every time the function is called. The object's constructor is activated at
+the point where the object is defined (a subtlety is that an object may be
+defined implicitly as, e.g., a temporary variable in an expression).
+<p>
+When an object is defined as a static object
+ <a name="an832"></a><a name="an833"></a> it is constructed when
+the program starts. In this case its constructor is called even
+before the function <code >main</code> starts. Example:
+    <pre>
+    #include &lt;iostream&gt;
+    using namespace std;
+
+    class Demo
+    {
+        public:
+            Demo();
+    };
+
+    Demo::Demo()
+    {
+        cout &lt;&lt; "Demo constructor called\n";
+    }
+
+    Demo d;
+
+    int main()
+    {}
+
+    /*
+        Generated output:
+    Demo constructor called
+    */
+</pre>
+ The program contains one global object of the class <code >Demo</code> with <code >main</code>
+having an empty body. Nonetheless, the program produces some output generated
+by the constructor of the globally defined <code >Demo</code> object.
+<p>
+Constructors have a very important and well-defined role. They must ensure
+that all the class's data members have sensible or at least well-defined
+values once the object has been constructed. We'll get back to this important
+task shortly. The <em >default constructor</em><a name="an834"></a> has no
+argument. It is defined by the compiler unless another constructor is defined
+and unless its definition is suppressed (cf. section <a href="cplusplus07.html#DEFAULTED">7.6</a>). If a
+default constructor is required in addition to another constructor then the
+default constructor must explicitly be defined as well. <strong >C++</strong> provides
+special syntax to realize that without much effort, which is also covered by
+section <a href="cplusplus07.html#DEFAULTED">7.6</a>.
+<p>
+<a name="APPLICATION"></a><a name="l135"></a>
+<h3 >7.1.1: A first application</h3>
+    Our example class <code >Person</code> has three string data members and a <code >size_t
+d_mass</code> data member. Access to these data members is controlled by
+ <a name="an835"></a>interface functions.
+<p>
+Whenever an object is defined the class's constructor(s) ensure that its data
+members are given `sensible' values. Thus, objects never suffer from
+uninitialized values. Data members may be given new values, but that should
+never be directly allowed. It is a core principle (called
+ <a name="an836"></a><em >data hiding</em>) of good class design that its data members are private. The
+modification of data members is therefore fully controlled by member functions
+and thus, indirectly, by the class-designer. The class <em >encapsulates</em> all
+actions performed on its data members and due to this
+ <a name="an837"></a><em >encapsulation</em> the class object may assume the `responsibility' for its
+own data-integrity. Here is a minimal definition of <code >Person</code>'s manipulating
+members:
+    <pre>
+    #include "person.h"                 // given earlier
+    using namespace std;
+
+    void Person::setName(string const &amp;name)
+    {
+        d_name = name;
+    }
+    void Person::setAddress(string const &amp;address)
+    {
+        d_address = address;
+    }
+    void Person::setPhone(string const &amp;phone)
+    {
+        d_phone = phone;
+    }
+    void Person::setMass(size_t mass)
+    {
+        d_mass = mass;
+    }
+</pre>
+ It's a minimal definition in that no checks are performed. But it should be
+clear that checks are easy to implement. E.g., to ensure that a phone number
+only contains digits one could define:
+        <pre>
+    void Person::setPhone(string const &amp;phone)
+    {
+        if (phone.empty())
+            d_phone = " - not available -";
+        else if (phone.find_first_not_of("0123456789") == string::npos)
+            d_phone = phone;
+        else
+            cout &lt;&lt; "A phone number may only contain digits\n";
+    }
+</pre>
+<p>
+Note the double negation in this implementation. Double negations are very
+hard to read, and an encapsulating member <code >bool hasOnly</code> handles the test,
+and improves <code >setPhone's</code> readability:
+        <pre>
+    bool Person::hasOnly(char const *characters, string const &amp;object)
+    {
+                        // object only contains 'characters'
+        return object.find_first_not_of(characters) == string::npos;
+    }
+</pre>
+<p>
+and <code >setPhone</code> becomes:
+        <pre>
+    void Person::setPhone(string const &amp;phone)
+    {
+        if (phone.empty())
+            d_phone = " - not available -";
+        else if (hasOnly("0123456789", phone))
+            d_phone = phone;
+        else
+            cout &lt;&lt; "A phone number may only contain digits\n";
+    }
+</pre>
+<p>
+Since <code >hasOnly</code> is an encapsulated member function we can ensure that
+it's only used with non-empty string objects, so <code >hasOnly</code> itself doesn't
+have to check for that.
+<p>
+Access to the data members is controlled by <a name="an838"></a><em >accessor</em>
+members. Accessors ensure that data members cannot suffer from uncontrolled
+modifications. Since accessors conceptually do not modify the object's data
+(but only retrieve the data) these member functions are given the predicate
+<code >const</code>. They are called <a name="an839"></a><a name="an840"></a><em >const member</em> <em >functions</em>,
+which, as they are guaranteed not to modify their object's data, are available
+to both modifiable and constant objects (cf. section <a href="cplusplus07.html#ConstFunctions">7.7</a>).
+<p>
+To prevent <a name="an841"></a><em >backdoors</em> we must also make sure that the data member is
+not modifiable through an accessor's return value. For values of built-in
+primitive types that's easy, as they are usually returned by value, which are
+copies of the values found in variables.  But since objects may be fairly
+large making copies is usually prevented by returning objects by reference. A
+backdoor is created by returning a data member by reference, as in the
+following example, showing the allowed abuse below the function definition:
+        <pre>
+    string &amp;Person::name() const
+    {
+        return d_name;
+    }
+
+    Person somebody;
+    somebody.setName("Nemo");
+
+    somebody.name() = "Eve";    // Oops, backdoor changing the name
+</pre>
+<p>
+To prevent the backdoor objects are returned as <em >const references</em> from
+accessors. Here are the implementations of <code >Person</code>'s accessors:
+    <pre>
+    #include "person.h"                 // given earlier
+    using namespace std;
+
+    string const &amp;Person::name() const
+    {
+        return d_name;
+    }
+    string const &amp;Person::address() const
+    {
+       return d_address;
+    }
+    string const &amp;Person::phone() const
+    {
+       return d_phone;
+    }
+    size_t Person::mass() const
+    {
+       return d_mass;
+    }
+</pre>
+<p>
+The <code >Person</code> class interface remains the starting point for the class
+design: its member functions define what can be asked of a <code >Person</code>
+object. In the end the implementation of its members merely is a technicality
+allowing <code >Person</code> objects to do their jobs.
+<p>
+The next example shows how the class <code >Person</code> may be used. An object is
+initialized and passed to a function <code >printperson()</code>, printing the person's
+data. Note the reference operator in the parameter list of the function
+<code >printperson</code>.  Only a reference to an existing <code >Person</code> object is passed
+to the function, rather than a complete object.  The fact that
+<code >printperson</code> does not modify its argument is evident from the fact that
+the parameter is declared <code >const</code>.
+    <pre>
+    #include &lt;iostream&gt;
+    #include "person.h"                 // given earlier
+    using namespace std;
+
+    void printperson(Person const &amp;p)
+    {
+        cout &lt;&lt; "Name    : " &lt;&lt; p.name()     &lt;&lt; "\n"
+                "Address : " &lt;&lt; p.address()  &lt;&lt; "\n"
+                "Phone   : " &lt;&lt; p.phone()    &lt;&lt; "\n"
+                "Mass  : " &lt;&lt; p.mass()   &lt;&lt; '\n';
+    }
+
+    int main()
+    {
+        Person p;
+
+        p.setName("Linus Torvalds");
+        p.setAddress("E-mail: Torvalds@cs.helsinki.fi");
+        p.setPhone("");
+        p.setMass(75);           // kg.
+
+        printperson(p);
+    }
+/*
+    Produced output:
+
+Name    : Linus Torvalds
+Address : E-mail: Torvalds@cs.helsinki.fi
+Phone   :  - not available -
+Mass  : 75
+
+*/
+</pre>
+<p>
+<a name="l136"></a>
+<h3 >7.1.2: Constructors: with and  without arguments</h3>
+    The class <code >Person</code>'s constructor so far has not received any
+parameters. <strong >C++</strong> allows constructors to be defined with or without
+parameter lists. The arguments are supplied when an object is defined.
+<p>
+For the class <code >Person</code> a constructor expecting three strings and a
+<code >size_t</code> might be useful. Representing, respectively, the person's name,
+address, phone number and mass. This constructor can be implemented like this
+(but see also section <a href="cplusplus07.html#MemberInitializers">7.3.1</a>):
+        <pre>
+    Person::Person(string const &amp;name, string const &amp;address,
+                   string const &amp;phone, size_t mass)
+    {
+        d_name = name;
+        d_address = address;
+        setPhone(phone);
+        d_mass = mass;
+    }
+</pre>
+<p>
+It must of course also be declared in the class interface:
+        <pre>
+    class Person
+    {
+        // data members (not altered)
+
+        public:
+            Person(std::string const &amp;name, std::string const &amp;address,
+                   std::string const &amp;phone, size_t mass);
+
+            // rest of the class interface (not altered)
+    };
+</pre>
+<p>
+Now that this constructor has been declared, the default constructor must
+explicitly be declared as well if we still want to be able to construct a
+plain <code >Person</code> object without any specific initial values for its data
+members.  The class <code >Person</code> would thus support two constructors, and the
+part declaring the constructors now becomes:
+        <pre>
+    class Person
+    {
+        // data members
+        public:
+            Person();
+            Person(std::string const &amp;name, std::string const &amp;address,
+                   std::string const &amp;phone, size_t mass);
+
+            // additional members
+    };
+</pre>
+<p>
+In this case, the default constructor doesn't have to do very much, as it
+doesn't have to initialize the <code >string</code> data members of the <code >Person</code>
+object. As these data members are objects themselves, they are initialized to
+empty strings by their own default constructor.  However, there is also a
+<code >size_t</code> data member. That member is a variable of a built-in type and such
+variabes do not have constructors and so are not initialized automatically.
+Therefore, unless the value of the <code >d_mass</code> data member is explicitly
+initialized its value is:
+    <ul>
+    <li> a <em >random</em> value for local <code >Person</code> objects;
+    <li> 0 for global and static <code >Person</code> objects.
+    </ul>
+    The 0-value might not be too bad, but normally we don't want a <em >random</em>
+value for our data members. So, even the default constructor has a job to do:
+initializing the data members which are not initialized to sensible values
+automatically. Its implementation can be:
+        <pre>
+    Person::Person()
+    {
+        d_mass = 0;
+    }
+</pre>
+<p>
+Using constructors with and without arguments is illustrated next. The
+object <code >karel</code> is initialized by the constructor defining a non-empty
+parameter list while the default constructor is used for the <code >anon</code>
+object. When constructing objects using constructors requiring arguments you
+are advised to surround the arguments by curly braces. Parentheses can often
+also be used, and sometimes even <em >have</em> to be used (cf. section
+<a href="cplusplus12.html#VECTOR">12.4.2</a>), but mindlessly using parentheses instead of curly braces may
+easily result in unexpected problems (cf. section <a href="cplusplus07.html#AMBIGUITY">7.2</a>). Hence the
+advice to prefer curly braces rather than parentheses. Here's the
+example showing two constructor-calls:
+        <pre>
+    int main()
+    {
+        Person karel{ "Karel", "Rietveldlaan 37", "542 6044", 70 };
+        Person anon;
+    }
+</pre>
+<p>
+The two <code >Person</code> objects are defined when <code >main</code> starts as they are
+<em >local</em> objects, living only for as long as <code >main</code> is active.
+<p>
+If <code >Person</code> objects must be definable using other arguments,
+corresponding constructors must be added to <code >Person</code>'s interface. Apart from
+overloading class constructors it is also possible to provide constructors
+with default argument values. These default arguments must be specified with
+the constructor declarations in the class interface, like so:
+        <pre>
+    class Person
+    {
+        public:
+            Person(std::string const &amp;name,
+                   std::string const &amp;address = "--unknown--",
+                   std::string const &amp;phone   = "--unknown--",
+                   size_t mass = 0);
+
+    };
+</pre>
+<p>
+Often, constructors use highly similar implementions. This results from
+the fact that the constructor's parameters are often defined for convenience:
+a constructor not requiring a <code >phone</code> number but requiring a <code >mass</code> cannot
+be defined using default arguments, since <code >phone</code> is not the constructor's
+last parameter. Consequently a special constructor is required not having
+<code >phone</code> in its parameter list. However, this doesn't necessarily mean that
+constructors must duplicate their code, as constructors may call each other
+(called <em >constructor delegation</em>). Constructor delegation is illustrated in
+section <a href="cplusplus07.html#CONSCALL">7.4.1</a> below.
+<p>
+<a name="l137"></a>
+<h4>7.1.2.1: The order of construction</h4>
+        The possibility to pass arguments to constructors allows us to monitor the
+construction order of objects during program execution.  This is illustrated
+by the next program using a class <code >Test</code>. The program defines a global
+<code >Test</code> object and two local <code >Test</code> objects. The order of construction is
+as expected: first global, then main's first local object, then <code >func</code>'s
+local object, and then, finally, <code >main</code>'s second local object:
+    <pre>
+    #include &lt;iostream&gt;
+    #include &lt;string&gt;
+    using namespace std;
+
+    class Test
+    {
+        public:
+            Test(string const &amp;name);   // constructor with an argument
+    };
+
+    Test::Test(string const &amp;name)
+    {
+        cout &lt;&lt; "Test object " &lt;&lt; name &lt;&lt; " created" &lt;&lt; '\n';
+    }
+
+    Test globaltest("global");
+
+    void func()
+    {
+        Test functest("func");
+    }
+
+    int main()
+    {
+        Test first{ "main first" };
+        func();
+        Test second{ "main second" };
+    }
+/*
+    Generated output:
+Test object global created
+Test object main first created
+Test object func created
+Test object main second created
+*/
+</pre>
+<p>
+<a name="AMBIGUITY"></a><a name="l138"></a>
+<h2 >7.2: Ambiguity resolution</h2>
+Calling constructors using parentheses may result in unexpected
+surprises. Assume the following class interface is available:
+        <pre>
+    class Data
+    {
+        public:
+            Data();
+            Data(int one);
+            Data(int one, int two);
+
+            void display();
+    };
+</pre>
+<p>
+The intention is to define two objects of the class Data, using, respectively,
+the first and second constructors, while using parentheses in the object
+definitions. Your code looks like this (and compiles correctly):
+        <pre>
+    #include "data.h"
+    int main()
+    {
+        Data d1();
+        Data d2(argc);
+    }
+</pre>
+<p>
+Now it's time to make some good use of the <code >Data</code> objects. Let's add two
+statements to <code >main</code>:
+            <pre>
+        d1.display();
+        d2.display();
+</pre>
+<p>
+But, surprise, the compiler complains about the first of these two:
+<p>
+<em >error: request for member 'display' in 'd1', which is of non-class type
+'Data()'</em>
+<p>
+What's going on here? First of all, notice the data type the compiler refers
+to: <code >Data()</code>, rather than <code >Data</code>. What are those <code >()</code> doing there?
+<p>
+Before answering that question, let's broaden our story somewhat. We know that
+somewhere in a library a <a name="an842"></a><em >factory function</em> <code >dataFactory</code> exists. A
+factory function creates and returns an object of a certain type. This
+<code >dataFactory</code> function returns a <code >Data</code> object, constructed using
+<code >Data</code>'s default constructor. Hence, <code >dataFactory</code> needs no arguments. We
+want to use <code >dataFactory</code> in our program, but must declare the function. So
+we add the declaration to <code >main</code>, as that's the only location where
+<code >dataFactory</code> will be used. It's a function, not requiring arguments,
+returning a <code >Data</code> object:
+            <pre>
+        Data dataFactory();
+</pre>
+<p>
+This, however, looks remarkably similar to our <code >d1</code> object definition:
+            <pre>
+        Data d1();
+</pre>
+<p>
+We found the source of our problem: <code >Data d1()</code> apparently is <em >not</em>
+the definition of a <code >d1</code> object, but the <em >declaration</em> of a function,
+returning a <code >Data</code> object. So, what's happening here and how should we 
+define a <code >Data</code> object using <code >Data</code>'s default constructor?
+<p>
+First: what's happening here is that the compiler, when confronted with
+<code >Data d1()</code>, actually had a choice. It could either define a <code >Data</code>
+object, or declare a function. It declares a function. 
+<p>
+In fact, we're encountering an <a name="an843"></a>ambiguity in <strong >C++</strong>'s grammar here, which is
+solved, according to the language's standard, by always letting a declaration
+prevail over a definition. We'll encounter more situations where this
+ambiguity occurs later on in this section.
+<p>
+Second: there are several ways we can solve this ambiguity the way we
+want it to be solved. To define an object using its default constructor:
+    <ul>
+    <li> merely mention it (like <code >int x</code>): <code >Data d1</code>;
+    <li> use the curly-brace initialization: <code >Data d1{}</code>;
+    <li> use the assignment operator and an anonymous default constructed
+        <code >Data</code> object: <code >Data d1 = Data{}</code>, or possibly <code >Data d1 =
+        Data()</code>. 
+    </ul>
+<p>
+<a name="l139"></a>
+<h3 >7.2.1: Types `Data' vs. `Data()'</h3>
+    
+    <code >Data()</code> in the above context defines a default constructed anonymous
+<code >Data</code> object. This takes us back to the compiler error. According to the
+compiler, our original <code >d1</code> apparently was not of type <code >Data</code>, but of type
+<code >Data()</code>. So what's that?
+<p>
+Let's first have a look at our second constructor. It expects an
+<code >int</code>. We would like to define another <code >Data</code> object, using the second
+constructor, but want to pass the default <code >int</code> value to the constructor,
+using <code >int()</code>. We know this defines a default <code >int</code> value, as <code >cout &lt;&lt;
+int() &lt;&lt; '\n'</code> nicely displays 0, and <code >int x = int()</code> also initialized x to 
+0. So we define <code >`Data di(int())'</code> in <code >main</code>.
+<p>
+Not good: again the compiler complains when we try to use
+<code >di</code>. After <code >`di.display()'</code> the compiler tells us:
+<p>
+<em >error: request for member 'display' in 'di', which is of non-class type
+'Data(int (*)())'</em> 
+<p>
+Oops, again not as expected.... Didn't we pass 0? Why the sudden pointer? It's
+that same `use a declaration when possible' strategy again. The notation
+<code >Type()</code> not only represents the default value of type <code >Type</code>, but it's
+also a shorthand notation for an anonymous pointer to a function, not
+expecting arguments, and returning a <code >Type</code> value, which you can verify by
+defining <code >`int (*ip)() = nullptr'</code>, and passing <code >ip</code> as argument to
+<code >di</code>: <code >di(ip)</code> compiles fine.
+<p>
+So why doesn't the error occur when inserting <code >int()</code> or assigning <code >int()</code>
+to <code >int x</code>? In these latter cases nothing is declared. Rather, `<code >cout</code>'
+and `<code >int x =</code>' require expressions determining values, which is provided by
+<code >int()</code>'s `natural' interpretation. But with <code >`Data di(int())'</code> the
+compiler again has a choice, and (by design) it chooses a declaration because
+the declaration takes priority. Now <code >int()</code>'s interpretation as an anonymous
+pointer is available and therefore used.
+<p>
+Likewise, if <code >int x</code> has been defined, <code >`Data b1(int(x))'</code> declares <code >b1</code>
+as a function, expecting an <code >int</code> (as <code >int(x)</code> represents a type), while
+<code >`Data b2((int)x)'</code> defines <code >b2</code> as a <code >Data</code> object, using the
+constructor expecting a single <code >int</code> value.
+<p>
+Again, to use default entities, values or objects, prefer <code >{}</code> over <code >()</code>:
+<code >Data di{ int{} }</code> defines <code >di</code> of type <code >Data</code>, calling the <code >Data(int
+x)</code> constructor and uses <code >int's</code> default value 0.
+<p>
+<a name="l140"></a>
+<h3 >7.2.2: Superfluous parentheses</h3>
+    Let's play some more. At some point in our program we defined <code >int b</code>. Then,
+in a compound statement we need to construct an anonymous <code >Data</code> object,
+initialized using <code >b</code>, followed by displaying <code >b</code>:
+    
+            <pre>
+    int b = 18;
+    {
+        Data(b);
+        cout &lt;&lt; b;
+    }
+</pre>
+<p>
+About that <code >cout</code> statement the compiler tells us (I modified the
+error message to reveal its meaning):
+<p>
+<em >error: cannot bind `std::ostream &amp; &lt;&lt; Data const &amp;'</em>
+<p>
+Here we didn't insert <code >int b</code> but <code >Data b</code>. Had we omitted the compound
+statement, the compiler would have complained about a doubly defined <code >b</code>
+entity, as <code >Data(b)</code> simply means <code >Data b</code>, a <code >Data</code> object constructed
+by default. The compiler may omit superfluous parentheses when parsing a
+definition or declaration. 
+<p>
+Of course, the question now becomes how a temporary object <code >Data</code>,
+initialized with <code >int b</code> can be defined. Remember that the compiler may
+remove superfluous parentheses. So, what we need to do is to pass an <code >int</code>
+to the anonymous <code >Data</code> object, without using the <code >int</code>'s name.
+    <ul>
+    <li> We can use a cast: <code >Data(static_cast&lt;int&gt;(b))</code>;
+    <li> We can use a curly-brace initialization: <code >Data{ b }</code>.
+    </ul>
+<p>
+Values and types make big differences. Consider the following definitions:
+        <pre>
+    Data (*d4)(int);    // 1
+    Data (*d5)(3);      // 2
+</pre>
+<p>
+Definition 1 should cause no problems: it's a pointer to a function,
+expecting an <code >int</code>, returning a <code >Data</code> object. Hence, <code >d4</code> is a pointer
+variable.  
+<p>
+Definition 2 is slightly more complex. Yes, it's a pointer. But it has
+nothing to do with a function. So what's that argument list containing 3 doing
+there? Well, it's not an argument list. It's an initialization that looks like
+an argument list. Remember that variables can be initialized using the
+assignment statement, by parentheses or by curly parentheses. So instead of
+<code >`(3)'</code> we could have written <code >`= 3'</code> or <code >`{3}'</code>. Let's pick the first
+alternative, resulting in:
+        <pre>
+    Data (*d5) = 3;
+</pre>
+<p>
+Now we get to `play compiler' again. Removing some superfluous
+parentheses we get:
+        <pre>
+    Data *d5 = 3;
+</pre>
+<p>
+It's a pointer to a <code >Data</code> object, initialized to 3. This is
+semantically incorrect, but that's only clear after the syntactical
+analysis. If I had initially written
+        <pre>
+     Data (*d5)(&amp;d1);      // 2
+</pre>
+<p>
+the fun resulting from contrasting <code >int</code> and <code >3</code> would most likely
+have been spoiled.
+<p>
+<a name="l141"></a>
+<h3 >7.2.3: Existing types</h3>
+    Once a type name has been defined it also prevails over identifiers
+representing variables, if the compiler is given a choice. This, too, can
+result in interesting constructions.
+<p>
+Assume a function <code >process</code> expecting an <code >int</code> exists in a library. We
+want to use this function to process some <code >int</code> data values. So in <code >main</code>
+<code >process</code> is declared and called:
+        <pre>
+    int process(int Data);
+    process(argc);
+</pre>
+<p>
+No problems here. But unfortunately we once decided to `beautify' our
+code, by throwing in some superfluous parentheses, like so:
+        <pre>
+    int process(int (Data));
+    process(argc);
+</pre>
+<p>
+Now we're in trouble. The compiler now generates an error, caused by its
+rule to let declarations prevail over definitions. <code >Data</code> now becomes the
+name of the <code >class Data</code>, and analogous to <code >int (x)</code> the parameter <code >int
+(Data)</code> is parsed as <code >int (*)(Data)</code>: a pointer to a function, expecting a
+<code >Data</code> object, returning an <code >int</code>. 
+<p>
+Here is another example. When, instead of declaring 
+        <pre>
+    int process(int Data[10]);
+</pre>
+<p>
+we declare, e.g., to emphasize the fact that an array is passed to
+<code >process</code>:
+        <pre>
+    int process(int (Data[10]));
+</pre>
+<p>
+the <code >process</code> function does not expect a pointer to <code >int</code> values, but
+a pointer to a function expecting a pointer to <code >Data</code> elements, returning an
+<code >int</code>. 
+<p>
+To summarize the findings in the `Ambiguity Resolution' section:
+    <ul>
+    <li> The compiler will try to remove superfluous parentheses;
+    <li> But if the parenthesized construction represents a type, it will try
+        to use the type;
+    <li> More in general: when possible the compiler will interpret a
+        syntactic construction as a declaration, rather than as a definition
+        (of an object or variable).
+    <li> Most problems that result from the compiler interpreting
+        constructions as declarations are caused by us using parentheses. As a
+        <a name="an844"></a>rule of thumb: use curly braces, rather than parentheses when
+        constructing objects (or values).
+    </ul>
+<p>
+<a name="Composition"></a><a name="l142"></a>
+<h2 >7.3: Objects inside objects: composition</h2>
+In the class <code >Person</code> objects are used as data members. This construction
+technique is called <a name="an845"></a><em >composition</em>.
+<p>
+Composition is neither extraordinary nor <strong >C++</strong> specific: in <strong >C</strong>
+a <code >struct</code> or <code >union</code> field is commonly used in other compound types. In
+<strong >C++</strong> it requires some special thought as their initialization sometimes is
+subject to restrictions, as discussed in the next few sections.
+<p>
+<a name="MemberInitializers"></a><a name="l143"></a>
+<h3 >7.3.1: Composition and (const) objects: (const) member initializers</h3>
+    Unless specified otherwise object data members of classes are initialized by
+their default constructors. Using the default constructor might not always be
+the optimal way to intialize an object and it might not even be possible: a
+class might simply not define a default constructor.
+<p>
+Earlier we've encountered the following constructor of the <code >Person</code>:
+        <pre>
+    Person::Person(string const &amp;name, string const &amp;address,
+                   string const &amp;phone, size_t mass)
+    {
+        d_name = name;
+        d_address = address;
+        d_phone = phone;
+        d_mass = mass;
+    }
+</pre>
+<p>
+Think briefly about what is going on in this constructor. In the
+constructor's body we encounter assignments to string objects. Since
+assignments are used in the constructor's body their left-hand side objects
+must exist. But when objects are coming into existence constructors <em >must</em>
+have been called. The initialization of those objects is thereupon immediately
+undone by the body of <code >Person</code>'s constructor. That is
+not only inefficient but sometimes downright impossible. Assume that the class
+interface mentions a <code >string const</code> data member: a data member whose value
+is not supposed to change at all (like a birthday, which usually  doesn't
+change very much and is therefore a good candidate for a <code >string const</code> data
+member). Constructing a birthday object and providing it with an initial value
+is OK, but changing the initial value isn't.
+<p>
+The body of a constructor allows assignments to data members. The
+<em >initialization</em> of data members happens before that. <strong >C++</strong> defines the
+ <a name="an846"></a><em >member initializer</em> syntax allowing us to specify the way data members
+are initialized at construction time. Member initializers are specified as a
+list of constructor specifications between  a colon following a constructor's
+parameter list and the opening curly brace of a constructor's body, as
+follows:
+        <pre>
+    Person::Person(string const &amp;name, string const &amp;address,
+                   string const &amp;phone, size_t mass)
+    :
+        d_name(name),
+        d_address(address),
+        d_phone(phone),
+        d_mass(mass)
+    {}
+</pre>
+<p>
+In this example the member initialization used parentheses surrounding the
+intialization expression. <a name="an847"></a>Instead of
+parentheses <em >curly braces</em> may also be used. E.g., <code >d_name</code> could also be
+initialized this way:
+        <pre>
+        d_name{ name },
+</pre>
+<p>
+Member initialization <em >always</em> occurs when objects are composed in
+classes: if <em >no</em> constructors are mentioned in the member initializer list
+the default constructors of the objects are called. Note that this only holds
+true for <em >objects</em>. Data members of primitive data types are <em >not</em>
+initialized automatically.
+<p>
+Member initialization can, however, also be used for primitive data members,
+like <code >int</code> and <code >double</code>. The above example shows the initialization of the
+data member <code >d_mass</code> from the parameter <code >mass</code>. When member
+initializers are used the data member could even have the same name as the
+constructor's parameter (although this is deprecated) as there is no ambiguity
+and the first (left) identifier used in a member initializer is always a data
+member that is initialized whereas the identifier between parentheses is
+interpreted as the parameter.
+<p>
+The <em >order</em> in which class type data members are initialized is defined by
+the order in which those members are defined in the composing class
+interface. If the order of the initialization in the constructor differs from
+the order in the class interface, the compiler complains, and reorders the
+initialization so as to match the order of the class interface.
+<p>
+Member initializers should be used as often as possible. As shown it may be
+required to use them (e.g., to initialize const data members, or to initialize
+objects of classes lacking default constructors) but <em >not</em> using member
+initializers also results in inefficient code as the default constructor of a
+data member is always automatically called unless an explicit member
+initializer is specified. Reassignment in the constructor's body following
+default construction is then clearly inefficient. Of course, sometimes it is
+fine to use the default constructor, but in those cases the explicit member
+initializer can be omitted.
+<p>
+As a <a name="an848"></a>rule of thumb: if a value is assigned to a data member in the
+constructor's body then try to avoid that assignment in favor of using a
+member initializer.
+<p>
+<a name="REFMEMBERS"></a><a name="l144"></a>
+<h3 >7.3.2: Composition and reference objects: reference member initializers</h3>
+    Apart from using member initializers to initialize composed objects (be they
+<code >const</code> objects or not), there is another situation where member
+initializers must be used. Consider the following situation.
+<p>
+A program uses an object of the class <code >Configfile</code>, defined in <code >main</code>
+to access the information in a configuration file. The configuration file
+contains parameters of the program which may be set by changing the values in
+the configuration file, rather than by supplying command line arguments.
+<p>
+Assume another object used in <code >main</code> is an object of the class <code >Process</code>,
+doing `all the work'. What possibilities do we have to tell the object of the
+class <code >Process</code> that an object of the class <code >Configfile</code> exists?
+    <ul>
+    <li> The objects could have been declared as <em >global</em> objects. This
+<em >is</em> a possibility, but not a very good one, since all the advantages of
+local objects are lost.
+    <li> The <code >Configfile</code> object may be passed to the <code >Process</code> object at
+construction time. Bluntly passing an object (i.e., by value) might not
+be a very good idea, since the object must be copied into the <code >Configfile</code>
+parameter, and then a data member of the <code >Process</code> class can be used to make
+the <code >Configfile</code> object accessible throughout the <code >Process</code> class. This
+might involve yet another object-copying task, as in the following situation:
+    <pre>
+Process::Process(Configfile conf)   // a copy from the caller
+{
+    d_conf = conf;                  // copying to d_conf member
+}
+</pre>
+<p>
+<li> The copy-instructions can be avoided if <em >pointers</em> to
+the <code >Configfile</code> objects are used, as in:
+    <pre>
+Process::Process(Configfile *conf)  // pointer to external object
+{
+    d_conf = conf;                  // d_conf is a Configfile *
+}
+</pre>
+<p>
+This construction as such is OK, but forces us to use the `<code >-&gt;</code>' field
+selector operator, rather than the `<code >.</code>' operator, which is (disputably)
+awkward. Conceptually one tends to think of the <code >Configfile</code> object as an
+object, and not as a pointer to an object. In <strong >C</strong> this would probably have
+been the preferred method, but in <strong >C++</strong> we can do better.
+    <li> Rather than using value or pointer parameters, the <code >Configfile</code>
+parameter could be defined as a <a name="an849"></a><em >reference parameter</em> of <code >Process</code>'s
+constructor. Next, use a <code >Config</code> reference data member in the
+<code >class Process</code>.
+    </ul>
+    But a reference variable cannot be initialized using an assignment, and so
+the following is incorrect:
+        <pre>
+    Process::Process(Configfile &amp;conf)
+    {
+        d_conf = conf;        // wrong: no assignment
+    }
+</pre>
+<p>
+The statement <code >d_conf = conf</code> fails, because it is not an
+initialization, but an assignment of one <code >Configfile</code> object (i.e.,
+<code >conf</code>), to another (<code >d_conf</code>). An assignment to a reference variable is
+actually an assignment to the variable the reference variable refers to. But
+which variable does <code >d_conf</code> refer to? To no variable at all, since we
+haven't initialized <code >d_conf</code>.  After all, the whole purpose of the statement
+<code >d_conf = conf</code> was to initialize <code >d_conf</code>....
+<p>
+How to initialize <code >d_conf</code>? We once again use the member initializer
+syntax. Here is the correct way to  initialize <code >d_conf</code>:
+        <pre>
+    Process::Process(Configfile &amp;conf)
+    :
+        d_conf(conf)      // initializing reference member
+    {}
+</pre>
+<p>
+The above syntax must be used in all cases where reference data members
+are used. E.g., if <code >d_ir</code> would have been an <code >int</code> reference data member,
+a construction like
+        <pre>
+    Process::Process(int &amp;ir)
+    :
+        d_ir(ir)
+    {}
+</pre>
+<p>
+would have been required.
+<p>
+<a name="l145"></a>
+<h2 >7.4: Data member initializers</h2>
+    Non-static data members of classes are usually initialized by the class's
+constructors. Frequently (but not always) the same initializations are used by
+different constructors, resulting in multiple points where the initializations
+are performed, which in turn complicates class maintenance.
+<p>
+Consider a class defining several data members: a pointer to data, a data
+member storing the number of data elements the pointer points at, a data
+member storing the sequence number of the object. The class also
+offer a basic set of constructors, as shown in the following class interface:
+        <pre>
+    class Container
+    {
+        Data *d_data;
+        size_t d_size;
+        size_t d_nr;
+
+        static size_t s_nObjects;
+
+        public:
+            Container();
+            Container(Container const &amp;other);
+            Container(Data *data, size_t size);
+            Container(Container &amp;&amp;tmp);
+    };
+</pre>
+<p>
+The initial values of the data members are easy to describe, but somewhat
+hard to implement. Consider the initial situation and assume the default
+constructor is used: all data members should be set to 0, except for <code >d_nr</code>
+which must be given the value <code >++s_nObjects</code>. Since these are
+<em >non</em>-default actions, we can't declare the default constructor using <code >=
+default</code>, but we must provide an actual implementation:
+            <pre>
+    Container()
+    :
+        d_data(0),
+        d_size(0),
+        d_nr(++s_nObjects)
+    {}
+</pre>
+<p>
+In fact, <em >all</em> constructors require us to state the
+<code >d_nr(++s_nObjects)</code> initialization. So if <code >d_data</code>'s type would have been
+a (move aware) class type, we would still have to provide implementations for
+all of the above constructors.
+<p>
+<strong >C++</strong>, however, also supports 
+        <a name="an850"></a><em >data member initializers</em>,
+simplifying the initialization of non-static data members. Data member
+initializers allow us to assign initial values to data members. The compiler
+must be able to compute these initial values from initialization expressions,
+but the initial values do not have to be constant expressions. So
+<code >++s_nObjects</code> can be an initial value.
+<p>
+Using data member initializers for the class <code >Container</code> we get:
+        <pre>
+    class Container
+    {
+        Data *d_data = 0;
+        size_t d_size = 0;
+        size_t d_nr = ++s_nObjects;
+
+        static size_t s_nObjects;
+
+        public:
+            Container() = default;
+            Container(Container const &amp;other);
+            Container(Data *data, size_t size);
+            Container(Container &amp;&amp;tmp);
+    };
+</pre>
+<p>
+Note that the data member initializations are recognized by the compiler,
+and are applied to its implementation of the default constructor. In fact, all
+constructors will apply the data member initializations, unless explicitly
+initialized otherwise. E.g., the move-constructor may now be implemented like
+this:
+        <pre>
+    Container(Container &amp;&amp;tmp)
+    :
+        d_data(tmp.d_data),
+        d_size(tmp.d_size)
+    {
+        tmp.d_data = 0;
+    }
+</pre>
+<p>
+Although <code >d_nr</code>'s intialization is left out of the implementation it
+<em >is</em> initialized due to the data member initialization provided in the
+class's interface.
+<p>
+An <a name="an851"></a><em >aggregate</em> is an array or a <code >class</code> (usually a <code >struct</code> with no
+user-defined constructors, no private or protected non-static data members,
+no base classes (cf. chapter <a href="cplusplus13.html#INHERITANCE">13</a>), and no virtual functions
+(cf. chapter <a href="cplusplus14.html#POLYMORPHISM">14</a>)). E.g.,
+        <pre>
+    struct POD      // defining aggregate POD
+    {
+        int first = 5; 
+        double second = 1.28; 
+        std::string hello{ "hello" };
+    };
+</pre>
+<p>
+To initialize such aggregates <em >braced initializer lists</em> can be used. In
+fact, their use is preferred over using the older form (using parentheses), as
+using braces avoids confusion with function declarations. E.g.,
+        <pre>
+    POD pod{ 4, 13.5, "hi there" };
+</pre>
+<p>
+When using  braced-initializer lists not all data members need to be
+initialized. Specification may stop at any data member, in which case the
+default (or explicitly defined initialization values) of the remaining data
+members are used. E.g.,
+        <pre>
+    POD pod{ 4 };   // uses second: 1.28, hello: "hello"
+</pre>
+<p>
+<a name="CONSCALL"></a><a name="l146"></a>
+<h3 >7.4.1: Delegating constructors</h3>
+    Often constructors are specializations of each other, allowing objects to be
+constructed specifying only subsets of arguments for all of its data members,
+using default argument values for the remaining data members.
+<p>
+Before the C++11 standard common practice was to define a member like <code >init</code>
+performing all initializations common to constructors. Such an <code >init</code>
+function, however, cannot be used to initialize <code >const</code> or reference data
+members, nor can it be used to perform so-called <em >base class</em>
+initializations (cf. chapter <a href="cplusplus13.html#INHERITANCE">13</a>).
+<p>
+Here is an example where such an <code >init</code> function might have been used. A
+class <code >Stat</code> is designed as a wrapper class around <strong >C</strong>'s <a name="an852"></a><strong >stat</strong>(2)
+function. The class might define three constructors: one expecting no
+arguments and initializing all data members to appropriate values; a second
+one doing the same, but it calls <code >stat</code> for the filename provided to the
+constructor; and a third one expecting a filename and a search path for the
+provided file name. Instead of repeating the initialization code in each
+constructor, the common code can be factorized into a member <code >init</code> which
+is called by the constructors.
+<p>
+<strong >C++</strong> offers an alternative by allowing constructors to call each
+other. This is called
+    <a name="an853"></a>
+    <a name="an854"></a><em >delegating constructors</em>
+        which is illustrated by the next example:
+        <pre>
+    class Stat
+    {
+        public:
+            Stat()
+            :
+                Stat("", "")        // no filename/searchpath
+            {}
+            Stat(std::string const &amp;fileName)
+            :
+                Stat(fileName, "")  // only a filename
+            {}
+            Stat(std::string const &amp;fileName, std::string const &amp;searchPath)
+            :
+                d_filename(fileName),
+                d_searchPath(searchPath)
+            {
+                // remaining actions to be performed by the constructor
+            }
+    };
+</pre>
+<p>
+<strong >C++</strong> allows static const integral data members to be initialized within
+the <a name="an855"></a> class interfaces (cf. chapter
+<a href="cplusplus08.html#StaticDataFun">8</a>). The <a name="an856"></a>C++11 standard adds to this the facility to define
+default initializations for plain data members in class interfaces (these data
+members may or may not be <code >const</code> or of integral types, but (of course) they
+cannot be reference data members).
+<p>
+These default initializations may be overruled by constructors. E.g., if
+the class <code >Stat</code> uses a data member <code >bool d_hasPath</code> which is <code >false</code> by
+default but the third constructor (see above) should initialize it to <code >true</code>
+then the following approach is possible:
+        <pre>
+    class Stat
+    {
+        bool d_hasPath = false;
+
+        public:
+            Stat(std::string const &amp;fileName, std::string const &amp;searchPath)
+            :
+                d_hasPath(true)     // overrule the interface-specified
+            {}                      // value
+    };
+</pre>
+<p>
+Here <code >d_hasPath</code> receives its value only once: it's always initialized
+to <code >false</code> except when the shown constructor is used in which case it is
+initialized to <code >true</code>.
+<p>
+<a name="UNIFORMINIT"></a><a name="l147"></a>
+<h2 >7.5: Uniform initialization</h2>
+When defining variables and objects they may immediately be given
+initial values. Class type objects are always initialized using one of their
+available constructors. <strong >C</strong> already supports the array and struct
+ <a name="an857"></a><a name="an858"></a><em >initializer list</em> consisting of a list of constant
+expressions surrounded by a pair of curly braces.
+<p>
+<strong >C++</strong> supports a comparable initialization, called 
+    <a name="an859"></a><em >uniform initialization</em>. It uses the following syntax:
+        <pre>
+    Type object{ value list };
+</pre>
+<p>
+When defining objects using a list of objects each individual object
+may use its own uniform initialization.
+<p>
+The advantage of uniform initialization over using constructors is that using
+constructor arguments may sometimes result in an ambiguity as constructing an
+object may sometimes be confused with using the object's overloaded function
+call operator (cf. section <a href="cplusplus11.html#FUNOBJ">11.10</a>). As initializer lists can only be used
+with <em >plain old data</em> (POD) types (cf. section <a href="cplusplus09.html#POD">9.10</a>) and with classes
+that are `initializer list aware' (like <code >std::vector</code>) the ambiguity does
+not arise when initializer lists are used.
+<p>
+Uniform initialization can be used to initialize an object or
+variable, but also to initialize data members in a constructor or implicitly
+in the return statement of functions. Examples:
+        <pre>
+    class Person
+    {
+        // data members
+        public:
+            Person(std::string const &amp;name, size_t mass)
+            :
+                d_name {name},
+                d_mass {mass}
+            {}
+
+            Person copy() const
+            {
+                return {d_name, d_mass};
+            }
+    };
+</pre>
+<p>
+Object definitions may be encountered in unexpected places, easily resulting in
+(human) confusion. Consider a function `<code >func</code>' and a very simple
+class <code >Fun</code> (<code >struct</code> is used, as data hiding is not an issue here;
+in-class implementations are used for brevity):
+        <pre>
+    void func();
+
+    struct Fun
+    {
+        Fun(void (*f)())
+        {
+            std::cout &lt;&lt; "Constructor\n";
+        };
+
+        void process()
+        {
+            std::cout &lt;&lt; "process\n";
+        }
+    };
+</pre>
+<p>
+Assume that in <code >main</code> a <code >Fun</code> object is defined as follows: 
+        <pre>
+    Fun fun(func);
+</pre>
+<p>
+Running this program displays <code >Constructor</code>, confirming that the
+object <code >fun</code> is constructed.
+<p>
+Next we change this line of code, intending to call <code >process</code> from an
+anonymous <code >Fun</code> object:
+        <pre>
+    Fun(func).process();
+</pre>
+<p>
+As expected, <code >Constructor</code> appears, followed by the text <code >process</code>.
+<p>
+What about just defining an anonymous <code >Fun</code> object? We do:
+        <pre>
+    Fun(func);
+</pre>
+<p>
+Now we're in for a surprise. The compiler complains that <code >Fun</code>'s default
+constructor is missing. Why's that? Insert some blanks immediately after
+<code >Fun</code> and you get <code >Fun (func)</code>. Parentheses around an identifier are OK,
+and are stripped off once the parenthesized expression has been parsed. In
+this case: <code >(func)</code> equals <code >func</code>, and so we have <code >Fun func</code>: the
+definition of a <code >Fun func</code> object, using <code >Fun</code>'s default constructor (which
+isn't provided).
+<p>
+So why does <code >Fun(func).process()</code> compile? In this case we have a member
+selector operator, whose left-hand operand must be an class-type object. The
+object must exist, and <code >Fun(func)</code> represents that object. It's not the name
+of an existing object, but a constructor expecting a function like <code >func</code>
+exists. The compiler now creates an anonymous <code >Fun</code>, passing it <code >func</code> as
+its argument.
+<p>
+Clearly, in this example, parentheses cannot be used to create an anonymous
+<code >Fun</code> object. However, the uniform initialization <em >can</em> be used. To define
+the anonymous <code >Fun</code> object use this syntax:
+        <pre>
+    Fun{ func };
+</pre>
+<p>
+(which can also be used to immediately call one of its members. E.g.,
+<code >Fun{func}.process()</code>).
+<p>
+Although the uniform intialization syntax is slightly different from the
+syntax  of an initializer list (the latter using the assignment operator) the
+compiler nevertheless uses the initializer list if a constructor
+supporting an initializer list is available. As an example consider:
+        <pre>
+    class Vector
+    {
+        public:
+            Vector(size_t size);
+            Vector(std::initializer_list&lt;int&gt; const &amp;values);
+    };
+
+    Vector vi = {4};
+</pre>
+<p>
+When defining <code >vi</code> the constructor expecting the initializer list is
+called rather than the constructor expecting a <code >size_t</code> argument. If the
+latter constructor is required the definition using the standard constructor
+syntax must be used. I.e., <code >Vector vi(4)</code>.
+<p>
+Initializer lists are themselves objects that may be constructed using
+another initializer list. However, values stored in an initializer list are
+immutable. Once the initializer list has been defined their values remain
+as-is.
+<p>
+Before using initializer lists the
+    <code >initializer_list</code><a name="an860"></a> header file must be included.
+<p>
+Initializer lists support a basic set of member functions and constructors:
+    <ul>
+    <li><a name="an861"></a><code >initializer_list&lt;Type&gt; object</code>:<br/>defines <code >object</code> as an empty initializer list
+    <li><code >initializer_list&lt;Type&gt; object { list of Type values }</code>:<br/>defines <code >object</code> as an initializer list containing <code >Type</code> values
+    <li><code >initializer_list&lt;Type&gt; object(other)</code>:<br/>initializes <code >object</code> using the values stored in <code >other</code>
+    <li><a name="an862"></a><code >size_t size() const</code>:<br/>returns the number of elements in the initializer list
+    <li><a name="an863"></a><code >Type const *begin() const</code>:<br/>returns a pointer to the first element of the initializer list
+    <li><a name="an864"></a><code >Type const *end() const</code>:<br/>returns a pointer just beyond the location of the last element of the
+initializer list
+    </ul>
+<p>
+<a name="DEFAULTED"></a><a name="l148"></a>
+<h2 >7.6: Defaulted and deleted class members</h2>
+In everyday class design two situations are frequently encountered:
+    <ul>
+        <li> A class offering constructors explicitly has to define a default
+constructor;
+        <li> A class (e.g., a class implementing a stream)
+cannot initialize objects by copying the values from an existing object of
+that class (called
+ <a name="an865"></a><em >copy construction</em>) and cannot assign objects to each other.
+    </ul>
+    Once a class defines at least one constructor its default constructor is
+not automatically defined by the compiler. <strong >C++</strong> relaxes that
+restriction somewhat by offering the <a name="an866"></a>`<a name="an867"></a><code >= default</code>'
+syntax. A class specifying `<code >= default</code>' with its default constructor
+declaration indicates that the <a name="an868"></a>trivial default constructor should be
+provided by the compiler. A trivial default constructor performs the following
+actions:
+    <ul>
+    <li> Its data members of built-in or primitive types are not initialized;
+    <li> Its composed (class type) data members are initialized by their
+default constructors.
+    <li> If the class is derived from a base class (cf. chapter
+<a href="cplusplus13.html#INHERITANCE">13</a>) the base class is initialized by its default constructor.
+    </ul>
+    Trivial implementations can also be provided for the <em >copy constructor</em>,
+the <em >overloaded assignment operator</em>, and the <em >destructor</em>. Those members
+are introduced in chapter <a href="cplusplus09.html#MEMORY">9</a>.
+<p>
+Conversely, situations exist where some (otherwise automatically provided)
+members should <em >not</em> be made available. This is realized by specifying
+ <a name="an869"></a>`<a name="an870"></a><code >= delete</code>'. Using <code >= default</code> and <code >= delete</code> is illustrated
+by the following example. The default constructor receives its trivial
+implementation, copy-construction is prevented:
+        <pre>
+    class Strings
+    {
+        public:
+            Strings() = default;
+            Strings(std::string const *sp, size_t size);
+
+            Strings(Strings const &amp;other) = delete;
+    };
+</pre>
+<p>
+<a name="ConstFunctions"></a><a name="l149"></a>
+<h2 >7.7: Const member functions and const objects</h2>
+The keyword <code >const</code> is often used behind the parameter list of member
+functions. This keyword indicates that a member function does not alter the
+data members of its object. Such member functions are called
+    <a name="an871"></a><em >const member functions</em>. In the class <code >Person</code>, we see that the
+accessor functions were declared <code >const</code>:
+        <pre>
+    class Person
+    {
+        public:
+            std::string const &amp;name()    const;
+            std::string const &amp;address() const;
+            std::string const &amp;phone()   const;
+            size_t mass()              const;
+    };
+</pre>
+<p>
+The rule of thumb given in section <a href="cplusplus03.html#ConstRule">3.1.1</a> applies here too:
+whichever appears to the <em >left</em> of the keyword <code >const</code>, is not
+altered. With member functions this should be interpreted as `doesn't alter
+its own data'.
+<p>
+When implementing a const member function the <code >const</code> attribute must be
+repeated:
+        <pre>
+    string const &amp;Person::name() const
+    {
+        return d_name;
+    }
+</pre>
+<p>
+The compiler prevents the data members of a class from being modified
+by one of its const member functions. Therefore a statement like
+        <pre>
+    d_name[0] = toupper(static_cast&lt;unsigned char&gt;(d_name[0]));
+</pre>
+<p>
+results in a compiler error when added to the above function's definition.
+<p>
+<code >Const</code> member functions are used to prevent inadvertent data
+modification. Except for constructors and the destructor (cf. chapter
+<a href="cplusplus09.html#MEMORY">9</a>) only const member functions can be used with (plain, references
+or pointers to) <code >const</code> objects.
+<p>
+Const objects are frequently encountered as <code >const &amp;</code> parameters of
+functions. Inside such functions only the object's const members may be
+used. Here is an example:
+        <pre>
+    void displayMass(ostream &amp;out, Person const &amp;person)
+    {
+        out &lt;&lt; person.name() &lt;&lt; " weighs " &lt;&lt; person.mass() &lt;&lt; " kg.\n";
+    }
+</pre>
+<p>
+Since <code >person</code> is defined as a <code >Person const &amp;</code> the function
+<code >displayMass</code> cannot call, e.g.,<br/>
+    <code >person.setMass(75)</code>.
+<p>
+The <code >const</code> member function attribute can be used to
+ <a name="an872"></a> overload member functions. When functions are
+overloaded by their <code >const</code> attribute the compiler uses the member
+function matching most closely the <a name="an873"></a>const-qualification of the object:
+    <ul>
+    <li> When the object is a <code >const</code> object, only <code >const</code> member
+functions can be used.
+    <li> When the object is not a <code >const</code> object, non-<code >const</code> member
+functions are used, <em >unless</em> only a <code >const</code> member function is
+available. In that case, the <code >const</code> member function is used.
+    </ul>
+    The next example illustrates how (non) <code >const</code> member functions are
+selected:
+        <pre>
+    #include &lt;iostream&gt;
+    using namespace std;
+
+    class Members
+    {
+        public:
+            Members();
+            void member();
+            void member() const;
+    };
+
+    Members::Members()
+    {}
+    void Members::member()
+    {
+        cout &lt;&lt; "non const member\n";
+    }
+    void Members::member() const
+    {
+        cout &lt;&lt; "const member\n";
+    }
+
+    int main()
+    {
+        Members const constObject;
+        Members       nonConstObject;
+
+        constObject.member();
+        nonConstObject.member();
+    }
+    /*
+            Generated output:
+
+        const member
+        non const member
+    */
+</pre>
+    As a general principle of design: member functions should always be given
+the <code >const</code> attribute, unless they actually modify the object's data.
+<p>
+<a name="ANONYMOUS"></a><a name="l150"></a>
+<h3 >7.7.1: Anonymous objects</h3>
+    Sometimes objects are used because they offer a certain functionality. The
+objects only exist because of their functionality, and nothing in the objects
+themselves is ever changed. The following class <code >Print</code> offers a facility to
+print a string, using a configurable prefix and suffix. A partial class
+interface could be:
+        <pre>
+    class Print
+    {
+        public:
+            Print(ostream &amp;out);
+            void print(std::string const &amp;prefix, std::string const &amp;text,
+                     std::string const &amp;suffix) const;
+    };
+</pre>
+<p>
+An interface like this would allow us to do things like:
+        <pre>
+    Print print{ cout };
+    for (int idx = 0; idx != argc; ++idx)
+        print.print("arg: ", argv[idx], "\n");
+</pre>
+<p>
+This works fine, but it could greatly be improved if we could pass
+<code >print</code>'s invariant arguments to <code >Print</code>'s constructor.  This would
+simplify <code >print</code>'s prototype (only one argument would need to be passed
+rather than three) and we could wrap the above code in a function
+expecting a <code >Print</code> object:
+        <pre>
+    void allArgs(Print const &amp;print, int argc, char **argv)
+    {
+        for (int idx = 0; idx != argc; ++idx)
+            print.print(argv[idx]);
+    }
+</pre>
+<p>
+The above is a fairly generic piece of code, at least it is with respect
+to <code >Print</code>. Since <code >prefix</code> and <code >suffix</code> don't change they can be passed
+to the constructor which could be given  the prototype:
+        <pre>
+    Print(ostream &amp;out, string const &amp;prefix = "", string const &amp;suffix = "");
+</pre>
+<p>
+Now <code >allArgs</code> may be used as follows:
+        <pre>
+    Print p1{ cout, "arg: ", "\n" };    // prints to cout
+    Print p2{ cerr, "err: --", "--\n" };// prints to cerr
+
+    allArgs(p1, argc, argv);            // prints to cout
+    allArgs(p2, argc, argv);            // prints to cerr
+</pre>
+<p>
+But now we note that <code >p1</code> and <code >p2</code> are only used inside the
+<code >allArgs</code> function. Furthermore, as we can see from <code >print</code>'s prototype,
+<code >print</code> doesn't modify the internal data of the <code >Print</code> object it is
+using.
+<p>
+In such situations it is actually not necessary to define objects before
+they are used. Instead <a name="an874"></a><em >anonymous object</em><em >s</em><a name="an875"></a> may be
+used. Anonymous objects can be used:
+    <ul>
+    <li> to initialize a function parameter which is a <code >const</code> reference to
+an object;
+    <li> if the object is <em >only</em> used inside the function call.
+    </ul>
+    When passing anonymous objects as arguments of <code >const &amp;</code> parameters of
+functions they are considered constant as they merely exist for passing the
+information of (class type) objects to those functions. This way, they cannot
+be modified, nor may their non-const member functions be used.  Of course, a
+<code >const_cast</code> could be used to cast away the const reference's constness, but
+that's considered bad practice on behalf of the function receiving the
+anonymous objects. Also, any modification to the anonymous object is lost once
+the function returns as the anonymous object ceases to exist after calling the
+function. These anonymous objects used to initialize const references should
+not be confused with passing anonymous objects to parameters defined as rvalue
+references (section <a href="cplusplus03.html#RREF">3.3.2</a>) which have a completely different purpose in
+life. Rvalue references primarily exist to be `swallowed' by functions
+receiving them. Thus, the information made available by rvalue references
+outlives the rvalue reference objects which are also anonymous.
+<p>
+Anonymous objects are defined when a constructor is used without providing
+a name for the constructed object. Here is the corresponding example:
+        <pre>
+    allArgs(Print{ cout, "arg: ", "\n" }, argc, argv);    // prints to cout
+    allArgs(Print{ cerr, "err: --", "--\n" }, argc, argv);// prints to cerr
+</pre>
+<p>
+In this situation the <code >Print</code> objects are constructed and immediately
+passed as first arguments to the <code >allArgs</code> functions, where they are
+accessible as the function's <code >print</code> parameter. While the <code >allArgs</code>
+function is executing they can be used, but once the function has completed,
+the anonymous <code >Print</code> objects are no longer accessible.
+<p>
+<a name="l151"></a>
+<h4>7.7.1.1: Subtleties with anonymous objects</h4>
+        Anonymous objects can be used to initialize function parameters
+that are <code >const</code> references to objects. These objects are created just
+before such a function is called, and are destroyed once the function has
+terminated. <strong >C++</strong>'s grammar allows us to use anonymous objects in other
+situations as well. Consider the following snippet of code:
+        <pre>
+    int main()
+    {
+        // initial statements
+        Print{ "hello", "world" };      // assume a matching constructor
+                                        // is available
+        // later statements
+    }
+</pre>
+<p>
+In this example an anonymous <code >Print</code> object is constructed, and it is
+immediately destroyed thereafter. So, following the `initial
+statements' our <code >Print</code> object is constructed. Then it is destroyed again
+followed by the execution of the `later statements'.
+<p>
+The example illustrates that the standard lifetime rules do not apply to
+anonymous objects. <a name="an876"></a>
+ <a name="an877"></a> Their lifetimes are limited to the
+<em >statements</em>, rather than to the <em >end of the block</em> in which they are
+defined.
+<p>
+Plain anonymous object are at least useful in one situation. Assume we
+want to put <em >markers</em> in our code producing some output when the program's
+execution reaches a certain point. An object's constructor could be
+implemented so as to provide that marker-functionality allowing us to put
+markers in our code by defining anonymous, rather than named objects.
+<p>
+<strong >C++</strong>'s grammar contains another remarkable characteristic illustrated
+by the next example:
+        <pre>
+    int main(int argc, char **argv)
+    {
+              // assume a matching constructor is available:
+        Print p{ cout, "", "" };            // 1
+        allArgs(Print{ p }, argc, argv);    // 2
+    }
+</pre>
+<p>
+In this example a non-anonymous object <code >p</code> is constructed in statement
+1, which is then used in statement 2 to <em >initialize</em> an anonymous
+object. The anonymous object, in turn, is then used to initialize
+<code >allArgs</code>'s <code >const</code> reference parameter. This use of an existing object
+to initialize another object is common practice, and is based on the existence
+of a so-called
+    <a name="an878"></a><em >copy constructor</em>. A copy constructor creates an object (as it is a
+constructor) using an existing object's characteristics to initialize the data
+of the object that's created. Copy constructors are discussed in depth in
+chapter <a href="cplusplus09.html#MEMORY">9</a>, but presently only the concept of a copy constructor is
+used.
+<p>
+In the above example a copy constructor is used to initialize an anonymous
+object. The anonymous object was then used to initialize a parameter of a
+function. However, when we try to apply the same trick (i.e., using an
+existing object to initialize an anonymous object) to a plain statement, the
+compiler generates an error: the object <code >p</code> can't be redefined (in statement
+3, below):
+        <pre>
+    int main(int argc, char *argv[])
+    {
+        Print p{ "", "" };                  // 1
+        allArgs(Print(p), argc, argv);      // 2
+        Print(p);                           // 3 error!
+    }
+</pre>
+<p>
+Does this mean that using an existing object to initialize an anonymous
+object that is used as function argument is OK, while an existing object can't
+be used to initialize an anonymous object in a plain statement?
+<p>
+The compiler actually provides us with the answer to this apparent
+contradiction. About statement 3 the compiler reports something like:
+        <pre>
+    error: redeclaration of 'Print p'
+</pre>
+<p>
+which solves the problem when realizing that within a compound statement
+objects and variables may be defined. Inside a compound statement, a
+<em >type name</em> followed by a <code >variable name</code> is the grammatical form of a
+variable definition. <em >Parentheses</em> can be used to break priorities, but if
+there are no priorities to break, they have no effect, and are simply ignored
+by the compiler. In statement 3 the parentheses allowed us to get rid of the
+blank that's required between a type name and the variable name, but to the
+compiler we wrote
+        <pre>
+        Print (p);
+</pre>
+<p>
+which is, since the parentheses are superfluous, equal to
+        <pre>
+        Print p;
+</pre>
+<p>
+thus producing <code >p</code>'s redeclaration.
+<p>
+As a further example: when we define a variable using a built-in type (e.g.,
+<code >double</code>) using superfluous parentheses the compiler quietly removes
+these parentheses for us:
+        <pre>
+    double ((((a))));       // weird, but OK.
+</pre>
+<p>
+To summarize our findings about anonymous variables:
+    <ul>
+    <li> Anonymous objects are great for initializing <code >const</code> reference
+parameters.
+    <li> The same syntax, however, can also be used in stand-alone
+statements, in which they are interpreted as variable definitions if our
+intention actually was to initialize an anonymous object using an existing
+object.
+    <li> Since this may cause confusion, it's probably best to restrict the
+use of anonymous objects to the first (and main) form: initializing function
+parameters.
+    </ul>
+<p>
+<a name="INLINE"></a><a name="l152"></a>
+<h2 >7.8: The keyword `inline'</h2>
+Let us take another look at the implementation of the function
+<code >Person::name()</code>:
+        <pre>
+    std::string const &amp;Person::name() const
+    {
+        return d_name;
+    }
+</pre>
+<p>
+This function is used to retrieve the name field of an object of the class
+<code >Person</code>. Example:
+        <pre>
+    void showName(Person const &amp;person)
+    {
+        cout &lt;&lt; person.name();
+    }
+</pre>
+<p>
+To insert <code >person</code>'s name the following actions are performed:
+    <ul>
+    <li> The function <code >Person::name()</code> is called.
+    <li> This function returns <code >person</code>'s <code >d_name</code> as a reference.
+    <li> The referenced name is inserted into <code >cout</code>.
+    </ul>
+    Especially the first part of these actions causes some time loss, since an
+extra function call is necessary to retrieve the value of the <code >name</code> field.
+Sometimes a faster procedure immediately making the <code >d_name</code> data member
+available is preferred without ever actually calling a function
+<code >name</code>. This can be realized using <a name="an879"></a><code >inline</code> functions. An inline
+function is a request to the compiler to insert the function's code at the
+location of the function's call. This may speed up execution by avoiding a
+function call, which typically comes with some (stack handling and parameter
+passing) overhead. Note that <code >inline</code> is a <em >request</em> to the compiler: the
+compiler may decide to ignore it, and <em >will</em> probably ignore it when the
+function's body contains much code. Good programming discipline suggests to be
+aware of this, and to avoid <code >inline</code> unless the function's body is fairly
+small. More on this in section <a href="cplusplus07.html#WHENINLINE">7.8.2</a>.
+<p>
+<a name="DEFINLINE"></a><a name="l153"></a>
+<h3 >7.8.1: Defining members inline</h3>
+    Inline functions may be implemented <em >in the class interface itself</em>. For the
+class <code >Person</code> this results in the following implementation of <code >name</code>:
+        <pre>
+    class Person
+    {
+        public:
+            std::string const &amp;name() const
+            {
+                return d_name;
+            }
+    };
+</pre>
+<p>
+Note that the <a name="an880"></a>inline code of the function <code >name</code> now literally
+occurs inline in the interface of the class <code >Person</code>. The keyword <code >const</code>
+is again added to the function's header.
+<p>
+Although members can be defined <a name="an881"></a> <em >in-class</em> (i.e.,
+inside the class interface itself), it is considered bad practice
+for the following reasons:
+    <ul>
+    <li> Defining members inside the interface contaminates the interface with
+implementations. The interface's purpose is to document what functionality the
+class offers. Mixing member declarations and implementation details
+complicates understanding the interface. Readers need to skip implementation
+details which takes time and makes it hard to grab the `broad picture', and
+thus to understand at a glance what functionality the class's objects are
+offering.
+    <li> In-class implementations of private member functions may usually be
+avoided altogether (as they are private members). They should be moved to the
+internal header file (<em >unless</em> inline public members use such inline private
+members).
+    <li> Although members that are eligible for inline-coding should remain
+inline, situations do exist where such inline members migrate from an inline
+to a non-inline definition. In-class inline definitions still need editing
+(sometimes considerable editing) before they can be compiled. This additional
+editing is undesirable.
+    </ul>
+    Because of the above considerations inline members should not be defined
+in-class. Rather, they should be defined following the class interface. The
+<code >Person::name</code> member is therefore preferably defined as follows:
+        <pre>
+    class Person
+    {
+        public:
+            std::string const &amp;name() const;
+    };
+
+    inline std::string const &amp;Person::name() const
+    {
+        return d_name;
+    }
+</pre>
+<p>
+If it is ever necessary to cancel <code >Person::name</code>'s inline
+implementation, then this becomes its non-inline implementation:
+        <pre>
+    #include "person.ih"
+
+    std::string const &amp;Person::name() const
+    {
+        return d_name;
+    }
+</pre>
+<p>
+Only the <code >inline</code> keyword needs to be removed to obtain the correct
+non-inline implementation.
+<p>
+Defining members inline has the following effect: whenever an inline-defined
+function is called, the compiler may <em >insert the function's body</em> at the
+location of the function call. It may be that the function itself is never
+actually called.
+<p>
+This construction, where the function code itself is inserted rather than a
+call to the function, is called an <a name="an882"></a>inline function.  Note that using inline
+functions may result in multiple occurrences of the code of those functions in
+a program: one copy for each invocation of the inline function. This is
+probably OK if the function is a small one, and needs to be executed
+fast. It's not so desirable if the code of the function is extensive. The
+compiler knows this too, and handles the use of inline functions as a
+<em >request</em> rather than a <em >command</em>. If the compiler considers the function
+too long, it will not grant the request. Instead it will treat the function as
+a normal function.
+<p>
+<a name="WHENINLINE"></a><a name="l154"></a>
+<h3 >7.8.2: When to use inline functions</h3>
+    When should <a name="an883"></a>inline functions be used, and when not? There are some
+    <a name="an884"></a> rules of thumb which may be followed:
+    <ul>
+    <li> In general inline functions should <strong >not</strong> be used.
+<em >Voil&agrave;</em>; that's simple, isn't it?
+    <li> Consider defining a function inline once a fully developed and
+tested program runs too slowly and shows `bottlenecks' in certain functions,
+and the bottleneck is removed by defining inline members. A <a name="an885"></a>profiler, which
+runs a program and determines where most of the time is spent, is necessary to
+perform such optimizations.
+    <li> Defining inline functions may be considered when they consist of
+one very simple statement (such as the return statement in the function
+<code >Person::name</code>).
+    <li> When a function is defined inline, its implementation is inserted
+in the code wherever the function is used. As a consequence, when the
+<em >implementation</em> of the inline function changes, all sources using the
+inline function must be recompiled. In practice that means that all functions
+must be recompiled that include (either directly or indirectly) the header
+file of the class in which the inline function is defined. Not a very
+attractive prospect.
+    <li> It is only useful to implement an inline function when the time spent
+during a function call is long compared to the time spent by the function's
+body. An example of an inline function which hardly affects the program's
+speed is:
+    <pre>
+inline void Person::printname() const
+{
+    cout &lt;&lt; d_name &lt;&lt; '\n';
+}
+</pre>
+<p>
+This function contains only one statement.  However, the statement takes a
+relatively long time to execute. In general, functions which perform input and
+output take lots of time. The effect of the conversion of this function
+<code >printname()</code> to inline would therefore lead to an insignificant gain in
+execution time.
+    </ul>
+    All inline functions <a name="an886"></a> have one disadvantage: the
+actual code is inserted by the compiler and must therefore be known at
+compile-time. Therefore, as mentioned earlier, an inline function can never be
+located in a run-time library. Practically this means that an inline function
+is found near the interface of a class, usually in the same header file. The
+result is a header file which not only shows the <strong >declaration</strong> of a class,
+but also part of its <strong >implementation</strong>, thus always blurring the distinction
+between interface and implementation.
+<p>
+<a name="NOTINLINE"></a><a name="l155"></a>
+<h4>7.8.2.1: A prelude: when NOT to use inline functions</h4>
+           <a name="an887"></a>
+As a prelude to chapter <a href="cplusplus14.html#POLYMORPHISM">14</a> (Polymorphism), there is one
+situation in which inline functions should definitely be avoided. At this
+point in the <strong >C++</strong> Annotations it's a bit too early to expose the full details,
+but since the keyword <code >inline</code> is the topic of this section this is
+considered the appropriate location for the advice.
+<p>
+There are situations where the compiler is confronted with so-called
+        <a name="an888"></a><em >vague linkage</em>
+    <br/>(cf.
+<a target=_top href="http://gcc.gnu.org/onlinedocs/gcc-4.6.0/gcc/Vague-Linkage.html">http://gcc.gnu.org/onlinedocs/gcc-4.6.0/gcc/Vague-Linkage.html</a>). These
+situations occur when the compiler does not have a clear indication in what
+object file to put its compiled code. This happens, e.g., with inline
+functions, which are usually encountered in multiple source files. Since the
+compiler may insert the code of ordinary inline functions in places where
+these functions are called, vague linking is usually no problem with these
+ordinary functions.
+<p>
+However, as explained in chapter <a href="cplusplus14.html#POLYMORPHISM">14</a>, when using polymorphism
+the compiler must ignore the <code >inline</code> keyword and define so-called
+<em >virtual members</em> as true (<em >out-of-line</em>)
+        <a name="an889"></a>
+    functions. In this situation the vague linkage may cause problems, as the
+compiler must decide in what object <strong >s</strong> to put their code. Usually that's
+not a big problem as long as the function is at least called once. But virtual
+functions are special in the sense that they may very well never be explicitly
+called. On some architectures (e.g., armel) the compiler may fail to compile
+such inline virtual functions. This may result in missing symbols in programs
+using them. To make matters slightly more complex: the problem may emerge when
+shared libraries are used, but not when static libraries are used.
+<p>
+To avoid all of these problems virtual functions should <em >never</em> be defined
+inline, but they should always be defined <em >out-of-line</em>. I.e., they should
+be defined in source files.
+<p>
+<a name="l156"></a>
+<h3 >7.8.3: Inline variables</h3>
+        In addition to inline functions, <a name="an890"></a> 
+inline variables can be defined (and identically initialized) in multiple
+translation units. E.g., a header file could contain
+        <pre>
+    inline int value = 15;                      // OK
+
+    class Demo
+    {
+        // static int s_value = 15;             // ERROR
+        static int constexpr s_value = 15;      // OK
+
+        static int s_inline;                    // OK: see below: the inline 
+                                                //   definition follows the 
+                                                //   class declaration
+    };
+    inline int Demo::s_inline = 20;             // OK
+</pre>
+<p>
+<a name="LOCAL"></a><a name="l157"></a>
+<h2 >7.9: Local classes: classes inside functions</h2>
+Classes are usually defined at the global or namespace level. However, it is
+entirely possible to define <a name="an891"></a> a local class, i.e., inside a
+function. Such classes are called <a name="an892"></a><em >local classes</em>.
+<p>
+Local classes can be very useful in advanced applications involving
+inheritance or templates (cf. section <a href="cplusplus13.html#NONDEFINIT">13.8</a>). At this point in the
+<strong >C++</strong> Annotations they have limited use, although their main features can be
+described. At the end of this section an example is provided.
+<p>
+<ul>
+    <li> Local classes may use almost all characteristics of normal classes.
+They may have constructors, destructors, data members, and member functions;
+    <li> Local classes cannot define static data members. Static member
+functions, however, <em >can</em> be defined.
+    <li> Since a local class may define static member functions, it is
+possible to define <a name="an893"></a><em >nested functions</em> in <strong >C++</strong> somewhat comparable to the
+way programming languages like <a name="an894"></a><strong >Pascal</strong> allow nested functions to be
+defined.
+    <li> If a local class needs access to a constant integral value, a
+local <em >enum</em> can be used. The <code >enum</code> may be anonymous, exposing only the
+<code >enum</code> values.
+    <li> Local classes cannot directly access the non-static variables of their
+surrounding context. For example, in the example shown below the class
+<code >Local</code> cannot directly access <code >main</code>'s <code >argc</code> parameter.
+    <li> Local classes may directly access global data and static variables
+defined by their surrounding function. This includes variables defined in the
+anonymous namespace of the source file containing the local class.
+    <li> Local class objects can be defined inside the function body, but they
+cannot leave the function as objects of their own type. I.e., a local class
+name cannot be used for either the return type or for the parameter types of
+its surrounding function.
+    <li> As a prelude to <a name="an895"></a><em >inheritance</em> (chapter <a href="cplusplus13.html#INHERITANCE">13</a>):
+a local class may be derived from an existing class allowing the surrounding
+function to return a dynamically allocated locally constructed  class object,
+pointer or reference via a base class pointer or reference.
+    </ul>
+    <pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+int main(int argc, char **argv)
+{
+    static size_t staticValue = 0;
+
+    class Local
+    {
+        int d_argc;             // non-static data members OK
+
+        public:
+            enum                // enums OK
+            {
+                VALUE = 5
+            };
+            Local(int argc)     // constructors and member functions OK
+            :                   // in-class implementation required
+                d_argc(argc)
+            {
+                                // global data: accessible
+                cout &lt;&lt; "Local constructor\n";
+                                // static function variables: accessible
+                staticValue += 5;
+            }
+            static void hello() // static member functions: OK
+            {
+                cout &lt;&lt; "hello world\n";
+            }
+    };
+    Local::hello();             // call Local static member
+    Local loc{ argc };          // define object of a local class.
+}
+</pre>
+<p>
+<a name="MUTABLE"></a><a name="l158"></a>
+<h2 >7.10: The keyword `mutable'</h2>
+Earlier, in section <a href="cplusplus07.html#ConstFunctions">7.7</a>, the concepts of const member
+functions and const objects were introduced.
+<p>
+<strong >C++</strong> also allows the declaration of data members which may be modified,
+even by const member function. Declarations of such data members start with
+the keyword <a name="an896"></a><code >mutable</code>.
+<p>
+Mutable should be used for those data members that may be modified without
+logically changing the object, which might therefore still be considered a
+constant object.
+<p>
+An example of a situation where <code >mutable</code> is appropriately used is found in
+the implementation of a string class. Consider the <code >std::string</code>'s <code >c_str</code>
+and <code >data</code> members. The actual data returned by the two members are
+identical, but <code >c_str</code> must ensure that the returned string is terminated by
+an 0-byte. As a string object has both a length and a capacity an easy
+way to implement <code >c_str</code> is to ensure that the string's capacity exceeds its
+length by at least one character. This invariant allows <code >c_str</code> to be
+implemented as follows:
+        <pre>
+    char const *string::c_str() const
+    {
+        d_data[d_length] = 0;
+        return d_data;
+    }
+</pre>
+<p>
+This implementation logically does not modify the object's data as the
+bytes beyond the object's initial (length) characters have undefined
+values. But in order to use this implementation <code >d_data</code> must be declared
+<code >mutable</code>:
+        <pre>
+    mutable char *d_data;
+</pre>
+<p>
+The keyword <code >mutable</code> is also useful in classes implementing, e.g.,
+reference counting. Consider a class implementing reference counting for
+strings. The object doing the reference counting might be a const object,
+but the class may define a copy constructor. Since const objects can't be
+modified, how would the copy constructor be able to increment the reference
+count? Here the <code >mutable</code> keyword may profitably be used, as it can be
+incremented and decremented, even though its object is a const object.
+<p>
+The keyword <code >mutable</code> should sparingly be used. Data modified by const
+member functions should never logically modify the object, and it should be
+easy to demonstrate this.  As a <a name="an897"></a>rule of thumb: do not use <code >mutable</code>
+unless there is a very clear reason (the object is logically not altered) for
+violating this rule.
+<p>
+<a name="CLASSHEADER"></a><a name="l159"></a>
+<h2 >7.11: Header file organization</h2>
+In section <a href="cplusplus02.html#CHeaders">2.5.10</a> the requirements for header files when a <strong >C++</strong>
+program also uses <strong >C</strong> functions were discussed.
+ <a name="an898"></a> Header files containing class interfaces have additional
+requirements.
+<p>
+First, source files. With the exception of the occasional classless
+function, source files contain the code of member functions of classes.
+Basically,  there are two approaches:
+    <ul>
+    <li> All required header files for a member function are included in each
+individual source file.
+    <li> All required header files (for all member functions of a class)
+are included in a header file that is included by each of the source
+files defining class members.
+    </ul>
+    The first alternative has the advantage of economy for the compiler: it
+only needs to read the header files that are necessary for a particular source
+file. It has the disadvantage that the program developer must include multiple
+header files again and again in source files: it both takes time to type the
+<code >include</code>-directives and to think about the header files which are needed in
+a particular source file.
+<p>
+The second alternative has the advantage of economy for the program developer:
+the header file of the class accumulates header files, so it tends to become
+more and more generally useful. It has the disadvantage that the compiler
+frequently has to process many header files which aren't actually used by the
+function to compile.
+<p>
+With computers running faster and faster (and compilers getting smarter and
+smarter) I think the second alternative is to be preferred over the first
+alternative. So, as a starting point source files of a particular class
+<code >MyClass</code> could be organized according to the following example:
+        <pre>
+    #include &lt;myclass.h&gt;
+
+    int MyClass::aMemberFunction()
+    {}
+</pre>
+<p>
+There is only one <code >include</code>-directive. Note that the directive refers to
+a header file in a directory mentioned in the <a name="an899"></a><code >INCLUDE</code>-file environment
+variable. Local header files (using <code >#include "myclass.h"</code>) could be used
+too, but that tends to complicate the organization of the class header file
+itself somewhat.
+<p>
+The organization of the header file itself requires some attention. Consider
+the following example, in which two classes <code >File</code> and <code >String</code> are
+used.
+<p>
+Assume the <code >File</code> class has a member <code >gets(String &amp;destination)</code>, while
+the class <code >String</code> has a member function <code >getLine(File &amp;file)</code>. The
+(partial) header file for the <code >class String</code> is then:
+        <pre>
+    #ifndef STRING_H_
+    #define STRING_H_
+
+    #include &lt;project/file.h&gt;   // to know about a File
+
+    class String
+    {
+        public:
+            void getLine(File &amp;file);
+    };
+    #endif
+</pre>
+<p>
+Unfortunately a similar setup is required for the class <code >File</code>:
+        <pre>
+    #ifndef FILE_H_
+    #define FILE_H_
+
+    #include &lt;project/string.h&gt;   // to know about a String
+
+    class File
+    {
+        public:
+            void gets(String &amp;string);
+    };
+    #endif
+</pre>
+<p>
+Now we have created a problem. The compiler, trying to compile the source
+file of the function <code >File::gets</code> proceeds as follows:
+    <ul>
+    <li> The header file <code >project/file.h</code> is opened to be read;
+    <li> <code >FILE_H_</code> is defined
+    <li> The header file <code >project/string.h</code> is opened to be read
+    <li> <code >STRING_H_</code> is defined
+    <li> The header file <code >project/file.h</code> is (again) opened to be read
+    <li> Apparently, <code >FILE_H_</code> is already defined, so the remainder of
+            <code >project/file.h</code> is skipped.
+    <li> The interface of the class <code >String</code> is now parsed.
+    <li> In the class interface a reference to a <code >File</code> object is
+            encountered.
+    <li> As the <code >class File</code> hasn't been parsed yet, a <code >File</code> is still
+        an undefined type, and the compiler quits with an error.
+    </ul>
+    The solution to this problem is to use a
+ <a name="an900"></a><em >forward class reference</em> <em >before</em> the class interface, and to include
+the corresponding class header file <em >beyond</em> the class interface. So we get:
+        <pre>
+    #ifndef STRING_H_
+    #define STRING_H_
+
+    class File;                 // forward reference
+
+    class String
+    {
+        public:
+            void getLine(File &amp;file);
+    };
+
+    #include &lt;project/file.h&gt;   // to know about a File
+
+    #endif
+</pre>
+<p>
+A similar setup is required for the class <code >File</code>:
+        <pre>
+    #ifndef FILE_H_
+    #define FILE_H_
+
+    class String;               // forward reference
+
+    class File
+    {
+        public:
+            void gets(String &amp;string);
+    };
+
+    #include &lt;project/string.h&gt;   // to know about a String
+
+    #endif
+</pre>
+<p>
+This works well in all situations where either references or pointers to
+other classes are involved and with (non-inline) member functions having
+    <a name="an901"></a>class-type return values or <a name="an902"></a> parameters.
+<p>
+This setup doesn't work with <a name="an903"></a>composition, nor with in-class inline
+member functions. Assume the class <code >File</code> has a <em >composed</em> data member of
+the class <code >String</code>. In that case, the class interface of the class <code >File</code>
+<em >must</em> include the header file of the class <code >String</code> before the class
+interface itself, because otherwise the compiler can't tell how big a <code >File</code>
+object is. A <code >File</code> object contains a <code >String</code> member, but the compiler
+can't determine the size of that <code >String</code> data member and thus, by
+implication, it can't determine the size of a <code >File</code> object.
+<p>
+In cases where classes contain composed objects (or are derived from other
+classes, see chapter <a href="cplusplus13.html#INHERITANCE">13</a>) the header files of the classes of the
+composed objects must have been read <em >before</em> the class interface itself.
+In such a case the <code >class File</code> might be defined as follows:
+        <pre>
+    #ifndef FILE_H_
+    #define FILE_H_
+
+    #include &lt;project/string.h&gt;     // to know about a String
+
+    class File
+    {
+        String d_line;              // composition !
+
+        public:
+            void gets(String &amp;string);
+    };
+    #endif
+</pre>
+<p>
+The class <code >String</code> can't declare a <code >File</code> object as a composed member:
+such a situation would again result in an undefined class while compiling the
+sources of these classes.
+<p>
+All remaining header files (appearing below the class interface itself)
+are required only because they are used by the class's source files.
+<p>
+This approach allows us to introduce yet another refinement:
+    <ul>
+    <li> Header files defining a class interface should <em >declare</em> what can
+be declared before defining the class interface itself. So, classes that are
+mentioned in a class interface  should be specified using
+ <a name="an904"></a> forward declarations <em >unless</em>
+        <ul>
+        <li> They are a <em >base class</em> of the current class (see chapter
+<a href="cplusplus13.html#INHERITANCE">13</a>);
+        <li> They are the class types of composed data members;
+        <li> They are used in inline member functions.
+        </ul>
+    In particular: additional actual header files are <em >not</em> required for:
+        <ul>
+            <li> class-type return values of functions;
+            <li> class-type value parameters of functions.
+        </ul>
+    Class header files  of objects that are either composed or inherited
+or that are used in inline functions, <em >must</em> be known to the compiler before
+the interface of the current class starts.  The information in the header
+file itself is protected by the <code >#ifndef ... #endif</code> construction introduced
+in section <a href="cplusplus02.html#CHeaders">2.5.10</a>.
+    <li> Program sources in which the class is used only need to include this
+header file. <a name="an905"></a> <em >Lakos</em>, (2001) refines this process even
+further. See his book <strong >Large-Scale <strong >C++</strong> Software Design</strong> for further
+details. This header file should be made available in a well-known location,
+such as a directory or subdirectory of the standard <a name="an906"></a><code >INCLUDE</code> path.
+    <li> To implement member functions the class's header file is required
+and usually additional header files (like the <code >string</code> header file) as
+well. The class header file itself as well as these additional header files
+should be included in a separate internal header file (for which the extension
+<code >.ih</code> <a name="an907"></a> (`<a name="an908"></a>internal header') is suggested).
+<p>
+The <code >.ih</code> file should be defined in the same directory as the source
+files of the class. It has the following characteristics:
+        <ul>
+        <li> There is <em >no</em> need for a protective <code >#ifndef</code> .. <code >#endif</code>
+shield, as the header file is never included by other header files.
+        <li> The standard <code >.h</code> header file defining the class interface
+is included.
+        <li> The header files of all classes used  as forward references in
+the standard <code >.h</code> header file are included.
+        <li> Finally, all other header files that are required in the source
+files of the class are included.
+        </ul>
+    An example of such a header file organization is:
+        <ul>
+        <li> First part, e.g., <code >/usr/local/include/myheaders/file.h</code>:
+    <pre>
+#ifndef FILE_H_
+#define FILE_H_
+
+#include &lt;fstream&gt;      // for composed 'ifstream'
+
+class Buffer;           // forward reference
+
+class File              // class interface
+{
+    std::ifstream d_instream;
+
+    public:
+        void gets(Buffer &amp;buffer);
+};
+#endif
+</pre>
+<p>
+<li> Second part, e.g., <code >~/myproject/file/file.ih</code>, where all
+sources of the class File are stored:
+    <pre>
+#include &lt;myheaders/file.h&gt; // make the class File known
+
+#include &lt;buffer.h&gt;         // make Buffer known to File
+#include &lt;string&gt;           // used by members of the class
+#include &lt;sys/stat.h&gt;       // File.
+</pre>
+<p>
+</ul>
+    </ul>
+<p>
+<a name="NAMESPACEHDR"></a><a name="l160"></a>
+<h3 >7.11.1: Using namespaces in header files</h3>
+    When entities from <a name="an909"></a> namespaces are used in <a name="an910"></a> header
+files, no <a name="an911"></a><code >using</code> directive should be specified in those header
+files if they are to be used as general header files declaring classes or
+other entities from a <a name="an912"></a>library. When the <code >using</code> directive is used in a
+header file then users of such a header file are forced to accept and use the
+declarations in all code that includes the particular header file.
+<p>
+For example, if in a namespace <code >special</code> an object <code >Inserter cout</code> is
+declared, then <code >special::cout</code> is of course a different object than
+<code >std::cout</code>. Now, if a class <code >Flaw</code> is constructed, in which the
+constructor expects a reference to a <code >special::Inserter</code>, then the class
+should be constructed as follows:
+        <pre>
+    class special::Inserter;
+
+    class Flaw
+    {
+        public:
+            Flaw(special::Inserter &amp;ins);
+    };
+</pre>
+<p>
+Now the person designing the class <code >Flaw</code> may be in a lazy mood, and
+might get bored by continuously having to prefix <code >special::</code> before every
+entity from that namespace. So, the following construction is used:
+        <pre>
+    using namespace special;
+
+    class Inserter;
+    class Flaw
+    {
+        public:
+            Flaw(Inserter &amp;ins);
+    };
+</pre>
+<p>
+This works fine, up to the point where somebody wants to include
+<code >flaw.h</code> in other source files: because of the <code >using</code> directive, this
+latter person is now by implication also <code >using namespace special</code>, which
+could produce unwanted or unexpected effects:
+        <pre>
+    #include &lt;flaw.h&gt;
+    #include &lt;iostream&gt;
+
+    using std::cout;
+
+    int main()
+    {
+        cout &lt;&lt; "starting\n";       // won't compile
+    }
+</pre>
+<p>
+The compiler is confronted with two interpretations for <code >cout</code>: first,
+because of the <code >using</code> directive in the <code >flaw.h</code> header file, it considers
+<code >cout</code> a <code >special::Inserter</code>, then, because of the <code >using</code> directive in
+the user program, it considers <code >cout</code> a <code >std::ostream</code>. Consequently,
+the compiler reports an error.
+<p>
+As a <a name="an913"></a>rule of thumb, header files intended for general use
+should not contain <code >using</code> declarations. This rule does not hold true for
+header files which are only included by the sources of a class: here the
+programmer is free to apply as many <code >using</code> declarations as desired, as
+these directives never reach other sources.
+<p>
+<a name="MODULES"></a><a name="l161"></a>
+<h2 >7.12: Modules</h2>
+Since the introduction of header files in the <strong >C</strong> language header files have
+been the main tool for declaring elements that are not defined but are used 
+in source files. E.g., when using <code >printf</code> in <code >main</code> the preprocessor
+directive <code >#include &lt;stdio.h&gt;</code> had to be specified.
+<p>
+This method still works in <strong >C++</strong>, but gradually proved to be
+inefficient. One reason being that header files have to be processed again for
+every source file of a set of source files each including that header
+file. The drawback of this approach quickly becomes apparent once classes are
+used, as the compiler will repeatedly have to process the class's header file
+for each source file using that class. Usually it's not just that one header
+file, but header files tend to include other header files, resulting in an
+avalanche of header files that must be processed by the compiler again and
+again for every single source file that the compiler must compile. If a
+typical source file includes <em >h</em> header files, and <em >s</em> source
+files must be compiled, then that results in a significant compilation load,
+as the compiler must process <em >s * h</em> header files.
+<p>
+Precompiled headers <a name="an914"></a> offered an initial attempt to
+reduce this excessive workload. But precompiled headers have problems of their
+own: they're enormously big (a precompiled header file of less than 100 bytes
+can easily result in a precompiled header of 25 MB or more), and they're kind
+of fragile: simply recompiling a header if it's younger than its precompiled
+form may quickly result in much overhead, e.g., if merely some comment is
+added to the header.
+<p>
+Another common defense mechanism encountered in traditional headers is the use
+of <em >include guards</em>, ensuring that a header file is processed once if it is
+included by multiple other header files. Such include guards are macros, and
+were extensively discussed in section <a href="cplusplus07.html#CLASSHEADER">7.11</a>. Include guards work,
+but completely depend on the uniqueness of the guard-identifier, which is
+usually a long name, written in capitals using several underscores to
+increase the probability of their uniqueness.
+<p>
+By offering <em >modules</em> the <code >C++2a</code> standard provides solutions to the problems
+mentioned above. At the time of this writing the Gnu <code >g++</code> compiler doesn't
+yet support modules, but the <a name="an915"></a><code >clang++</code> compiler (cf. 
+    <a name="an916"></a> <a href="http://clang.llvm.org">http://clang.llvm.org</a>) does. The
+current section therefore heavily depends on clang's documentation of modules
+provided in <a name="an917"></a> <a href="http://clang.llvm.org/docs/Modules.html">http://clang.llvm.org/docs/Modules.html</a> and
+is subject to future changes once the modules definition and implementation of
+the <code >C++2a</code> standard reaches its final stage. In this section it is assumed that
+a fairly recent clang compiler is available.
+<p>
+<a name="l162"></a>
+<h3 >7.12.1: An minimal demo example</h3>
+    In this section modules are introduced using a simple demo example. More
+extensive coverage of the module-definition language is provided in subsequent
+sections.
+<p>
+To create a module from an existing header file the directory (or its parent
+directory) must contain a file <a name="an918"></a><code >module.modulemap</code>. It contains the
+specifications for creating a module from one or more available header files.
+<p>
+Assume a directory <code >module</code> contains the following file header file:
+    <ul>
+    <li><code >module.h</code>:<br/>     
+        <pre>
+struct Data
+{
+    int data;
+};
+
+int fun();
+int gun();
+</pre>
+<p>
+</ul><br/> 
+    For the benefit of the example it merely declares a simple <code >struct</code> and
+a function <code >fun</code> (its content in fact is irrelevant: it could actually be
+completely empty).
+<p>
+To create a module from this header file define the following minimal
+<code >module.modulemap</code> and <code >main.cc</code> files:
+    <pre>
+     1: module minimal
+     2: {
+     3:     header "module/module.h"
+     4: }
+</pre>
+<p>
+<code >main.cc</code>:
+    <pre>
+    #include "module/module.h"
+
+    int main()
+    {
+    }
+</pre>
+<p>
+Here the function <code >main</code> is defined, because that's a requirement for
+creating a program, but any other source including a header that's mentioned
+in <code >module.modulemap</code> would also be OK. The above minimal <code >main</code>
+function's source file does exactly that: it includes <code >module/module.h</code>.
+<p>
+The file <code >module.modulemap</code> itself has a simple organization:
+    <ul>
+    <li> Line 1 specifies that a module should be constructed, named
+        `minimal';
+    <li> Line 3 specifies that the header file <code >module/module.h</code> defines the
+        module's content.
+    <li> The module's content specification follows the module's header 
+        (line 1), and is surrounded by a pair of curly brackets (lines 2 and
+        4).
+    </ul>
+<p>
+To create the module the source file must be compiled using the following
+command: 
+        <pre>
+    clang++-7 -fmodules --std=c++2a -O2 -c main.cc
+</pre>
+<p>
+All options are required:
+    <ul>
+    <li><code >-fmodules</code> is required to inform the compiler that modules should be
+        used;
+    <li> <code >-</code><code >-std=c++2a</code> is required because modules aren't available
+        before the <code >C++2a</code> standard;
+    <li><code >-O2</code> (or at least <code >-O1</code>) is required because using modules implies
+        some form of optimization, and without any optimization request the
+        compiler won't create the module;
+    <li><code >-c</code> isn't really required, but suffices to create the module.
+    </ul>
+<p>
+Following this command <code >main.o</code> and the module are created. By default the
+module is created in a system-defined cache location (but see also section
+<a href="cplusplus07.html#MODULEOPTS">7.12.2</a>). In my system this system-defined cache location is
+<code >/tmp/org.llvm.clang.frank/ModuleCache/</code>, containing
+    <ul>
+    <li><code >modules.timestamp</code>
+    <li> the module information itself in the subdirectory <code >2TA26R6BHQ19F/</code>.
+        It contains:
+        <ul>
+        <li><code >minimal-2ORZEBL9H54OZ.pcm</code> (17,992 bytes)
+        <li><code >modules.idx</code> (552 bytes).
+        </ul>
+    </ul>
+<p>
+Once the module is available it will be used if sources including at least one
+of its header files are recompiled. The module is rebuilt if one of its
+headers have changed.
+<p>
+Compare these sizes to the size of the precompiled header <code >module.h.gch</code>
+(created using <code >clang++ -x c++-header module.h</code>). On my system the compiled
+header (<code >module.h.gch</code>) is a file of some 195 KB large.
+<p>
+Note that the file <code >module.h</code> doesn't contain include guards. As
+modules handle the administration of which header has already been included,
+it's OK if <code >module.h</code> is included multiple times (e.g., add another 
+<code >#include "module/module.h"</code> line in <code >main.cc</code>) and recompile: compilation
+succeeds.
+<p>
+<a name="MODULEOPTS"></a><a name="l163"></a>
+<h3 >7.12.2: Compiler options</h3>
+    Clang offers several options for handling modules. The most important ones
+are:
+    <ul>
+    <li><a name="an919"></a><code >-fmodules</code> enables the use of modules;
+<p>
+<li><a name="an920"></a><code >-fmodules-cache-path=directory</code> specifies the location where the
+        modules are stored. When modules are created they are by default
+        stored (cached) in a system-selected default directory, e.g., a
+        location in the <code >/tmp</code> directory. This might not be what you want
+        (e.g., maybe the <code >/tmp</code> directory is cleaned at boot-time) in which
+        case a specific directory can be specified.  (e.g.,
+        <code >~/.cache/C++modules</code> or <code >/usr/local/C++modules-cache</code>);
+<p>
+<li><a name="an921"></a><code >-fmodules-prune-interval=seconds</code> defines the minimum delay in seconds
+        between attempts to prune old, unused module files from the
+        module-cache. The default interval is one week (to turn off pruning
+        use <code >-fmodules-prune-interval=0</code>). What an `old unused module file'
+        is is defined by the next option;
+<p>
+<li><a name="an922"></a><code >-fmodules-prune-after=seconds</code> defines the minimum interval in seconds
+        before it is removed from the cache by a pruning action if that module
+        has not been used during that interval. The default interval is about
+        a month (31 days);
+<p>
+<li><a name="an923"></a><code >-module-file-info module-path</code> writes information about the module
+        <code >module-path</code> (which is an absolute or relative path to an existing
+        module). Modules have extension <a name="an924"></a><code >.pcm</code><a name="an925"></a>,
+        and the option writes a local file having the module-path's base name.
+    </ul>
+<p>
+<a name="l164"></a>
+<h3 >7.12.3: The file `module.modulemap'</h3>
+    The <a name="an926"></a><code >module.modulemap</code> file defines the organization of one or more
+modules. It relates header files to defined module(s). The name
+<code >module.modulemap</code> is a predefined name, and module specifications must use
+this name. <code >Module.modulemap</code> files may contain comment: standard <strong >C</strong>
+and/or end-of-line comment.
+<p>
+A <a name="an927"></a><em >module specification</em> defines a name and possibly options for a
+module. The elements of a module specification are specified inside a
+curly-braced section (note that when using [xxx] the square brackets are
+<em >not</em> optional).
+<p>
+The following description does not cover the full syntax of <code >module.map</code>, as
+some specifications apply only to some operating systems. For the full
+description the reader is referred to the 
+<a href="http://clang.llvm.org/docs/Modules.html">http://clang.llvm.org/docs/Modules.html</a> document.
+<p>
+The generic layout of a <code >module.modulemap</code> file starts with the module
+header, defining the name of the module. This name is used as the first part
+of the compiled module file (e.g., <code >minimal-2ORZEBL9H54OZ.pcm</code> for a module
+called <code >minimal</code>). Different programs may use identical module names, as
+modules receives unique `last names' (in the example: <code >2ORZEBL9H54OZ</code>).
+<p>
+Inside a module definition headers commonly are included in module
+specifications of their own. So the generic syntax looks like this (in the
+syntax specifications the following conventions are used: blank lines separate
+syntax definitions; syntax elements followed by a <code >*</code> may be omitted or may
+be used once or multiple times; vertical bars separate alternatives; quoted
+names and characters should literally be used, without the quotes; <code >'ident'</code>
+must be replaced by a standard <strong >C++</strong> identifier; double quoted strings are
+NTBSs, (their meanings are provided inside the double quoted strings); syntax
+elements preceded by <code >opt_</code> (e.g., <code >'opt_[extern_c]'</code>) are optional (such
+elements are either omitted or are used without the <code >opt_</code> prefix:
+<code >'opt_[extern_c]'</code> means: <code >[extern_c]</code>)):
+        <pre>
+    module-declarations:
+        module_declaration*
+            
+    module_declaration:              
+        header
+        '{'
+            module_member*
+        '}'
+    |
+        'extern' 'module' 'ident' " TO DO "
+
+    header:
+        'module' 'ident' 'opt_[extern_c]'   // [extern_c]: the module holds
+                                            // C code that can be used from 
+                                            // within C++
+    module_member:
+        cf_modules_html             // refer to clang's Modules.html document
+    |                               // for these member declarations
+        export_declaration
+    |
+        header_declaration
+    |
+        link_declaration
+    |
+        module_declarations         // nested declarations are commonly used
+    |
+        requires_declaration
+    |
+        umbrella_dir_declaration
+
+
+    cf_modules_html:
+        config_macros_declaration
+    |
+        conflict_declaration
+    |
+        export_as_declaration
+    |
+        submodule_declaration
+    |
+        use_declaration
+
+
+    export_declaration:             // see below
+        'export' module_id          
+
+
+    feature_list:                   // see below
+        feature_list ',' 'ident'    
+    |
+        'ident'
+
+    header_declaration:
+    
+    link_declaration:               // add '-llibraryName' to the linker 
+        'link' "libraryName"        // when using the module
+    
+    requires_declaration
+        'requires' 'opt_!' feature_list
+    
+    umbrella_dir_declaration
+        'umbrella' "directory-specification"    // e.g., ".", see below
+</pre>
+<p>
+In this overview,
+<p>
+<ul>
+    <li><code >export_declaration</code> specifies a <code >module_id</code> which is the
+        name of the module that will be visible from the defined
+        modules. These names refer to headers (without the .h extension) that
+        are made visible from the current module. Usually everything is made
+        available, for which <code >export *</code> is commonly used. Refer to the
+        <code >Modules.html</code> document for additional info about using <code >export</code>.
+<p>
+<li><code >feature_list</code> is used to specify languages or architectures for which
+        the module is available. For <strong >C++</strong> the relevant features are
+        <em >cplusplus, cplusplus11, cplusplus14, cplusplus17, tls</em>. A
+        <code >cplusplsus2a</code> feature is not (yet?) available. The <code >tls</code> feature
+        means: thread local storage must be available. <br/>
+       Example: <code >requires cplusplus</code>.
+<p>
+<li><code >umbrella_dir_declaration</code> is used to indicate that all headers in and
+        below the specified directory must be added to the module. Directory
+        specification <code >"."</code>  refers to all headers in and below the current
+        directory.
+    </ul>
+<p>
+Usually when defining a a module its <code >module.modulemap</code> defines the module's
+name, and then uses the headers of its (sub)directories to define submodules
+for each directory, exporting all their symbols. E.g., the program
+<strong >ssh-cron</strong> (cf. <a href="https://fbb-git.gitlab.io/ssh-cron/">https://fbb-git.gitlab.io/ssh-cron/</a>) defines eight
+classes, each in its own subdirectory. To create the module <code >ssh_cron</code> the
+following <code >module.modulemap</code> can be used:
+        <pre>
+    module ssh_cron
+    {
+        module main {
+            header "main.ih"
+            export *
+        }
+
+        module cron {
+            header "cron/cron.ih"
+            export *
+        }
+
+        module crondata {
+            header "crondata/crondata.ih"
+            export *
+        }
+
+        module cronentry {
+            header "cronentry/cronentry.ih"
+            export *
+        }
+
+        module daemon {
+            header "daemon/daemon.ih"
+            export *
+        }
+
+        module ipcfunction {
+            header "ipcfunction/ipcfunction.ih"
+            export *
+        }
+
+        module options {
+            header "options/options.ih"
+            export *
+        }
+
+        module parser {
+            header "parser/parser.ih"
+            export *
+        }
+
+        module parserpre {
+            header "parser/parserpre.ih"
+            export *
+        }
+
+        module scanner {
+            header "scanner/scanner.ih"
+            export *
+        }
+
+    }
+</pre>
+<p>
+resulting in the module <code >ssh_cron-2D64GM0XFP9U2.pcm</code> which is about 11MB
+large.
+<p>
+<a name="l165"></a>
+<h3 >7.12.4: Evaluation</h3>
+    As mentioned in the introductory section, modules reduce the compiler's
+workload by performing <em >h + s</em> instead of <em >h * s</em> header compilations when
+<em >s</em> sources each including <code >h</code> header files are compiled. Furthermore,
+using modules no longer requires the use of include guards or other defensive
+measures to avoid repeated inclusion of headers, which is particularly
+unwelcome in <strong >C++</strong> as <strong >C++</strong> header files typically not only declare
+functions and variables, but also define class interfaces and templates
+(cf. chapter <a href="cplusplus21.html#TEMPLATES">21</a> and beyond). 
+<p>
+So what's the gain? In this final section about modules we compare the
+compilation  times of a relatively large program (<a name="an928"></a><code >bisonc++</code>, cf. 
+    <a href="http://fbb-git.gitlab.io/bisoncpp/">http://fbb-git.gitlab.io/bisoncpp/</a>), consisting of almost 30
+classes.
+<p>
+Compilation is performed by <code >clang++-7</code>, using three variants:
+    <ul>
+    <li> Plain compilation, using the compiler options 
+            <pre>
+--std=c++2a -Wall -O2 -pthread
+</pre>
+<p>
+<li> Compilation using a module. The module <code >bisoncpp</code> was first created
+        using the compiler options 
+       <pre>
+-fmodules --std=c++2a -Wall -O2 -pthread
+</pre>
+<p>
+and merely compiling <code >main.cc</code>. The generated module was
+        <code >bisoncpp-2VBAIMWQCR12B.pcm</code>, whose size was 13 MB. Following the
+        module's construction the <code >main.o</code> file was removed and the program
+        was built using the above options (so including <code >-fmodules</code>).
+<p>
+<li> Finally, the program was compiled not using modules, but using
+        precompiled headers. The precompiled headers were created as part of
+        the compilation process. The total size of all precompiled headers was
+        MB, which is fairly large, but as the precompiled headers are only
+        used for the compilation they can be removed once the program has been
+        compiled. 
+    </ul>
+<p>
+Compilating <code >bisonc++</code> using the plain source files (no module, no
+precompiled headers) required slightly more than 7 minutes. The <strong >time</strong>(1)
+program reported:
+    <pre>
+    442.894u 25.751s 7:57.73 98.0%  0+0k 6416+14560io 31pf+0w
+</pre>
+<p>
+It took Gnu's <code >g++</code> compiler a comparable amount of time to compile the
+sources:
+    <pre>
+    467.053u 32.818s 8:20.39 99.8%  0+0k 1064+26264io 10pf+0w
+</pre>
+<p>
+This comparison is important, as we'll see below.
+<p>
+Next, after first constructing the program's module, and then timing the full
+program's construction <strong >time</strong> reported:
+    <pre>
+    420.305u 23.804s 7:29.43 98.8%  0+0k 0+39672io 0pf+0w
+</pre>
+<p>
+A somewhat unexpected (and disappointing) result. There is a minimal gain
+in compilation time, but it's marginal. In fact at a second attempt a
+compilation time of 458 seconds was reported. Some variation is to be
+expected, but the compilation times of both methods clearly don't notably
+differ. 
+<p>
+Finally using precompiled headers. For this test Gnu's <code >g++</code> compiler was
+used, as <code >clang</code> doesn't automatically use available precompiled headers
+(cf. 
+    <a href="
+    https://clang.llvm.org/docs/UsersManual.html#using-a-pch-file">clang's users manual</a>). At the
+start of the compilation process the headers used by <code >bisonc++'s</code> almost 500
+source files were first precompiled (the time it took to precompile the
+headers is included in the time reported below). Now <strong >time</strong> reported:
+    <pre>
+    138.040u 18.447s 2:38.57 98.6%  0+0k 32+2245104io 0pf+0w
+</pre>
+<p>
+The total size of the precompiled headers is definitely exceeding the size
+of the module <code >bisoncpp-2VBAIMWQCR12B.pcm</code>: 1.1 GB. But then, the
+compilation time is reduced to about 1/3rd of the other two compilation
+methods.
+<p>
+Considering the above results the added benefit of using modules isn't
+immediately clear. Using modules doesn't result in an observable gain in
+compilation time, and so the main advantage appears to be that include guards
+are no longer required. Personally, I've <em >never</em> experienced problems with
+using include guards. Using of long, capitalized preprocessor identifiers
+has never been a problem, and has never resulted in colliding identifiers. 
+<p>
+On the other hand, modules are a new element of <strong >C++</strong> and the <code >clang</code>
+documentation explicitly states that the compiler's implementation and module
+definition language is subject to future changes. In that respect, modules are
+definitely an interesting addition to <strong >C++</strong> that is absolutely worth
+monitoring.
+<p>
+<a name="l166"></a>
+<h2 >7.13: Sizeof applied to class data members</h2>
+In <strong >C++</strong> the well-known <a name="an929"></a><code >sizeof</code> operator can be applied to data
+members of classes without the need to specify an object as well. Consider:
+        <pre>
+    class Data
+    {
+        std::string d_name;
+        ...
+    };
+</pre>
+<p>
+To obtain the size of <code >Data</code>'s <code >d_name</code> member the following
+expression can be used:
+        <pre>
+    sizeof(Data::d_name);
+</pre>
+<p>
+However, note that the compiler observes data protection  here as
+well. <code >Sizeof(Data::d_name)</code> can only be used where <code >d_name</code> may be
+visible as well, i.e., by <code >Data</code>'s member functions and friends.
+<p>
+
+<hr>
+<ul>
+    <li> <a href="cplusplus.html">Table of Contents</a>
+    <li> <a href="cplusplus06.html">Previous Chapter</a>
+    <li> <a href="cplusplus08.html">Next Chapter</a>
+</ul>
+<hr>
+</body>
+</html>
